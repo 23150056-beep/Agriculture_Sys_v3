@@ -323,6 +323,31 @@ input::placeholder {
   padding: 0.55rem 0.8rem;
 }
 
+.density-toggle {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.density-toggle button {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  filter: none;
+  transform: none;
+  background: #fff;
+  color: var(--text-muted);
+  padding: 0.3rem 0.58rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.density-toggle button.active {
+  background: #e6f2e8;
+  color: var(--brand-strong);
+}
+
 .auto-refresh-badge .mini-action {
   margin-left: 0.35rem;
 }
@@ -1149,6 +1174,40 @@ main {
 .loading {
   color: var(--text-muted);
   font-weight: 600;
+}
+
+:root[data-density='compact'] .shell {
+  gap: 0.7rem;
+  padding: 0.85rem;
+}
+
+:root[data-density='compact'] .panel {
+  padding: 0.75rem;
+}
+
+:root[data-density='compact'] .card {
+  padding: 0.65rem;
+}
+
+:root[data-density='compact'] .inline-form {
+  gap: 0.42rem;
+}
+
+:root[data-density='compact'] .data-table th,
+:root[data-density='compact'] .data-table td {
+  padding: 0.44rem 0.52rem;
+}
+
+:root[data-density='compact'] .list {
+  gap: 0.45rem;
+}
+
+:root[data-density='compact'] .list-row {
+  gap: 0.4rem;
+}
+
+:root[data-density='compact'] .mobile-card-list {
+  gap: 0.45rem;
 }
 
 @keyframes riseIn {

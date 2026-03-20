@@ -3,10 +3,11 @@ import { LayoutDashboard, PackageSearch, ShoppingBag, Truck, UserRound } from 'l
 import { ROLES } from '../../utils/constants'
 import { clearStoredAuth } from '../../utils/demoAuth'
 import useNotificationFeed from '../../hooks/useNotificationFeed'
+import DensityToggle from '../dynamic/DensityToggle'
 import KeyboardShortcuts from '../dynamic/KeyboardShortcuts'
 import NotificationCenter from '../dynamic/NotificationCenter'
 
-function Navbar({ user, onOpenPalette }) {
+function Navbar({ user, onOpenPalette, densityMode, onChangeDensity }) {
   const navigate = useNavigate()
   const { items: notifications, refresh } = useNotificationFeed(user)
 
@@ -31,6 +32,7 @@ function Navbar({ user, onOpenPalette }) {
         <Link to="/profile" className="nav-item"><UserRound size={16} />Profile</Link>
       </nav>
       <div className="user-meta">
+        <DensityToggle mode={densityMode} onChange={onChangeDensity} />
         <KeyboardShortcuts onOpenPalette={onOpenPalette} />
         <NotificationCenter
           items={notifications}

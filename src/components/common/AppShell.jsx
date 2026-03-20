@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ROLES } from '../../utils/constants'
+import useDensityMode from '../../hooks/useDensityMode'
 import useKeyboardShortcuts from '../../hooks/useKeyboardShortcuts'
 import CommandPalette from '../dynamic/CommandPalette'
 import Navbar from './Navbar'
@@ -9,6 +10,7 @@ import Sidebar from './Sidebar'
 function AppShell({ user, children }) {
   const navigate = useNavigate()
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const { mode, setMode } = useDensityMode()
 
   const paletteActions = useMemo(() => {
     const actions = [
@@ -47,9 +49,18 @@ function AppShell({ user, children }) {
     },
   ])
 
+  useEffect(() => {
+    document.documentElement.setAttribute('data-density', mode)
+  }, [mode])
+
   return (
     <div className="layout">
-      <Navbar user={user} onOpenPalette={() => setPaletteOpen(true)} />
+      <Navbar
+        user={user}
+        onOpenPalette={() => setPaletteOpen(true)}
+        densityMode={mode}
+        onChangeDensity={setMode}
+      />
       <div className="shell">
         <Sidebar user={user} />
         <main>{children}</main>
