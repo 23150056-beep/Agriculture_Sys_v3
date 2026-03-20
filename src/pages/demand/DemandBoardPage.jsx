@@ -10,6 +10,7 @@ import MobileDataCard from '../../components/common/MobileDataCard'
 import PageHeader from '../../components/common/PageHeader'
 import SkeletonLoader from '../../components/common/SkeletonLoader'
 import DynamicAutoRefreshBadge from '../../components/dynamic/AutoRefreshBadge'
+import ExportCenter from '../../components/dynamic/ExportCenter'
 import SavedViewPicker from '../../components/dynamic/SavedViewPicker'
 import StatusBadge from '../../components/common/StatusBadge'
 import Toast from '../../components/common/Toast'
@@ -184,6 +185,28 @@ function DemandBoardPage() {
           onSelect={setSelectedViewId}
           onSave={(name) => saveView(name, { query, statusFilter, viewMode })}
           onDelete={deleteView}
+        />
+        <ExportCenter
+          title="Export CSV"
+          filename="demand-posts.csv"
+          columns={[
+            { key: 'id', label: 'Demand ID' },
+            { key: 'product', label: 'Product' },
+            { key: 'target_quantity', label: 'Target Quantity' },
+            { key: 'budget_min', label: 'Budget Min' },
+            { key: 'budget_max', label: 'Budget Max' },
+            { key: 'required_by_date', label: 'Required By' },
+            { key: 'status', label: 'Status' },
+          ]}
+          rows={filteredPosts.map((post) => ({
+            id: post.id,
+            product: post.product_name || `#${post.product}`,
+            target_quantity: post.target_quantity,
+            budget_min: post.budget_min,
+            budget_max: post.budget_max,
+            required_by_date: post.required_by_date || 'N/A',
+            status: post.status,
+          }))}
         />
       </FilterBar>
       {loading ? <SkeletonLoader variant="table" lines={4} /> : null}

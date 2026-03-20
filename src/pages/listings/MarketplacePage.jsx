@@ -7,6 +7,7 @@ import FilterBar from '../../components/common/FilterBar'
 import ImageCard from '../../components/common/ImageCard'
 import SkeletonLoader from '../../components/common/SkeletonLoader'
 import DynamicAutoRefreshBadge from '../../components/dynamic/AutoRefreshBadge'
+import ExportCenter from '../../components/dynamic/ExportCenter'
 import SavedViewPicker from '../../components/dynamic/SavedViewPicker'
 import { getListings } from '../../api/listingsApi'
 import PageHeader from '../../components/common/PageHeader'
@@ -104,6 +105,30 @@ function MarketplacePage() {
           onSelect={setSelectedViewId}
           onSave={(name) => saveView(name, { query, chipFilter })}
           onDelete={deleteView}
+        />
+        <ExportCenter
+          title="Export CSV"
+          filename="marketplace-listings.csv"
+          columns={[
+            { key: 'id', label: 'ID' },
+            { key: 'product', label: 'Product' },
+            { key: 'quantity', label: 'Quantity' },
+            { key: 'unit', label: 'Unit' },
+            { key: 'price', label: 'Unit Price' },
+            { key: 'status', label: 'Status' },
+            { key: 'quality', label: 'Quality' },
+            { key: 'available_until', label: 'Available Until' },
+          ]}
+          rows={filteredListings.map((item) => ({
+            id: item.id,
+            product: item.product_name || `Product #${item.product}`,
+            quantity: item.quantity_available,
+            unit: item.unit,
+            price: item.unit_price,
+            status: item.urgent_sale ? 'Urgent Sale' : 'Normal',
+            quality: item.quality_grade || 'N/A',
+            available_until: item.available_until || 'N/A',
+          }))}
         />
       </FilterBar>
       {loading ? <SkeletonLoader lines={4} variant="table" /> : null}

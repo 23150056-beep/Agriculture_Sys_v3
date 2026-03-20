@@ -4,6 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { getLocations } from '../../api/catalogApi'
 import { getListings } from '../../api/listingsApi'
 import DynamicAutoRefreshBadge from '../../components/dynamic/AutoRefreshBadge'
+import ExportCenter from '../../components/dynamic/ExportCenter'
 import SavedViewPicker from '../../components/dynamic/SavedViewPicker'
 import DataTable from '../../components/common/DataTable'
 import EmptyState from '../../components/common/EmptyState'
@@ -210,6 +211,24 @@ function BuyerOrdersPage() {
           onSelect={setSelectedViewId}
           onSave={(name) => saveView(name, { query, statusFilter })}
           onDelete={deleteView}
+        />
+        <ExportCenter
+          title="Export CSV"
+          filename="buyer-orders.csv"
+          columns={[
+            { key: 'id', label: 'Order ID' },
+            { key: 'product', label: 'Product' },
+            { key: 'status', label: 'Status' },
+            { key: 'total_price', label: 'Total Price' },
+            { key: 'expected_delivery_date', label: 'Expected Delivery' },
+          ]}
+          rows={filteredOrders.map((order) => ({
+            id: order.id,
+            product: getOrderProductName(order),
+            status: order.status,
+            total_price: order.total_price,
+            expected_delivery_date: order.expected_delivery_date || 'N/A',
+          }))}
         />
       </FilterBar>
       {loading ? <SkeletonLoader lines={4} variant="table" /> : null}
