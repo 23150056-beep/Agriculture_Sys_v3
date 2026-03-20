@@ -207,6 +207,11 @@ input::placeholder {
   margin-bottom: 0.35rem;
 }
 
+.notification-actions {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
 .notification-panel ul {
   list-style: none;
   margin: 0;
@@ -229,6 +234,23 @@ input::placeholder {
 .notification-panel p,
 .notification-panel small {
   margin: 0;
+}
+
+.notification-item {
+  width: 100%;
+  background: transparent;
+  box-shadow: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+}
+
+.notification-item:hover {
+  transform: none;
+  box-shadow: none;
+  filter: none;
 }
 
 .badge-dot {

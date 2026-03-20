@@ -1,7 +1,7 @@
 import { Bell, CheckCheck } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
-function NotificationCenter({ items = [] }) {
+function NotificationCenter({ items = [], onOpenItem, onRefresh }) {
   const [open, setOpen] = useState(false)
   const [readMap, setReadMap] = useState({})
 
@@ -18,6 +18,10 @@ function NotificationCenter({ items = [] }) {
     setReadMap(next)
   }
 
+  const markRead = (itemId) => {
+    setReadMap((prev) => ({ ...prev, [itemId]: true }))
+  }
+
   return (
     <div className="notification-wrap">
       <button type="button" className="icon-button" onClick={() => setOpen((prev) => !prev)}>
@@ -28,15 +32,28 @@ function NotificationCenter({ items = [] }) {
         <section className="notification-panel">
           <header>
             <strong>Notifications</strong>
-            <button type="button" className="ghost-button" onClick={markAllRead}>
-              <CheckCheck size={14} /> Mark all
-            </button>
+            <div className="notification-actions">
+              {onRefresh ? <button type="button" className="ghost-button" onClick={onRefresh}>Refresh</button> : null}
+              <button type="button" className="ghost-button" onClick={markAllRead}>
+                <CheckCheck size={14} /> Mark all
+              </button>
+            </div>
           </header>
           <ul>
             {items.map((item) => (
               <li key={item.id} className={readMap[item.id] ? 'read' : ''}>
-                <p>{item.title}</p>
-                <small>{item.timeLabel}</small>
+                <button
+                  type="button"
+                  className="notification-item"
+                  onClick={() => {
+                    markRead(item.id)
+                    if (onOpenItem) onOpenItem(item)
+                    setOpen(false)
+                  }}
+                >
+                  <p>{item.title}</p>
+                  <small>{item.timeLabel}</small>
+                </button>
               </li>
             ))}
             {items.length === 0 ? <li className="read">No notifications</li> : null}
