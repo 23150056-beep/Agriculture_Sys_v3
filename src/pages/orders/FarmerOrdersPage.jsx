@@ -1,7 +1,14 @@
 import { useEffect, useState } from 'react'
 import { ClipboardCheck } from 'lucide-react'
+import DataTable from '../../components/common/DataTable'
+import EmptyState from '../../components/common/EmptyState'
+import ErrorState from '../../components/common/ErrorState'
+import FilterBar from '../../components/common/FilterBar'
+import MobileDataCard from '../../components/common/MobileDataCard'
 import { getFarmerOrders, updateOrderStatus } from '../../api/ordersApi'
 import PageHeader from '../../components/common/PageHeader'
+import StatusBadge from '../../components/common/StatusBadge'
+import Toast from '../../components/common/Toast'
 
 const STATUS_OPTIONS = ['CONFIRMED', 'PACKED', 'ASSIGNED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED']
 
@@ -9,6 +16,7 @@ function FarmerOrdersPage() {
   const [orders, setOrders] = useState([])
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [query, setQuery] = useState('')
 
   const loadOrders = () => {
     getFarmerOrders()
@@ -49,21 +57,57 @@ function FarmerOrdersPage() {
         title="Farmer Orders"
         subtitle="Manage status transitions for orders tied to your listings."
       />
-      {message ? <p>{message}</p> : null}
-      {error ? <p className="error">{error}</p> : null}
-      <ul className="list">
-        {orders.map((order) => (
-          <li key={order.id} className="list-row">
-            <span>Order #{order.id} status {order.status}</span>
-            <select defaultValue="" onChange={(event) => onStatusChange(order.id, event.target.value)}>
-              <option value="" disabled>Update status</option>
-              {STATUS_OPTIONS.map((status) => (
-                <option key={status} value={status}>{status}</option>
-              ))}
-            </select>
-          </li>
-        ))}
-      </ul>
+      <Toast message={message} type="success" />
+      {error ? <ErrorState message={error} /> : null}
+      <FilterBar>
+        <input
+          placeholder="Search farmer orders"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+        />
+      </FilterBar>
+      <div className="desktop-list">
+        <DataTable
+          rowKey="id"
+          rows={orders.filter((order) => `${order.id}`.includes(query) || `${order.status}`.toLowerCase().includes(query.toLowerCase()))}
+          emptyFallback={<EmptyState title="No farmer orders" description="Orders tied to your listings will appear here." />}
+          columns={[
+            { key: 'id', label: 'Order', render: (order) => `#${order.id}` },
+            { key: 'status', label: 'Status', render: (order) => <StatusBadge value={order.status} /> },
+            {
+              key: 'action',
+              label: 'Update',
+              render: (order) => (
+                <select defaultValue="" onChange={(event) => onStatusChange(order.id, event.target.value)}>
+                  <option value="" disabled>Update status</option>
+                  {STATUS_OPTIONS.map((status) => (
+                    <option key={status} value={status}>{status}</option>
+                  ))}
+                </select>
+              ),
+            },
+          ]}
+        />
+      </div>
+      <div className="mobile-card-list">
+        {orders
+          .filter((order) => `${order.id}`.includes(query) || `${order.status}`.toLowerCase().includes(query.toLowerCase()))
+          .map((order) => (
+            <MobileDataCard
+              key={order.id}
+              title={`Order #${order.id}`}
+              rows={[{ label: 'Status', value: order.status }]}
+              actions={
+                <select defaultValue="" onChange={(event) => onStatusChange(order.id, event.target.value)}>
+                  <option value="" disabled>Update status</option>
+                  {STATUS_OPTIONS.map((status) => (
+                    <option key={status} value={status}>{status}</option>
+                  ))}
+                </select>
+              }
+            />
+          ))}
+      </div>
     </section>
   )
 }

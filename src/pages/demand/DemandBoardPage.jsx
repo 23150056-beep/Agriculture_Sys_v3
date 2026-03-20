@@ -2,10 +2,17 @@ import { useEffect, useState } from 'react'
 import { Megaphone } from 'lucide-react'
 import { getLocations, getProducts } from '../../api/catalogApi'
 import { createDemandPost, getDemandPosts } from '../../api/demandApi'
+import EmptyState from '../../components/common/EmptyState'
+import ErrorState from '../../components/common/ErrorState'
+import FilterBar from '../../components/common/FilterBar'
+import MobileDataCard from '../../components/common/MobileDataCard'
 import PageHeader from '../../components/common/PageHeader'
+import StatusBadge from '../../components/common/StatusBadge'
+import Toast from '../../components/common/Toast'
 
 function DemandBoardPage() {
   const [posts, setPosts] = useState([])
+  const [query, setQuery] = useState('')
   const [products, setProducts] = useState([])
   const [locations, setLocations] = useState([])
   const [message, setMessage] = useState('')
@@ -97,12 +104,42 @@ function DemandBoardPage() {
         </select>
         <button type="submit">Create Demand</button>
       </form>
-      {message ? <p>{message}</p> : null}
-      {error ? <p className="error">{error}</p> : null}
+      <Toast message={message} type="success" />
+      {error ? <ErrorState message={error} /> : null}
       <p className="section-label">Active Demand Posts</p>
-      <ul className="list">
-        {posts.map((post) => <li key={post.id}>Demand #{post.id} product #{post.product} qty {post.target_quantity} status {post.status}</li>)}
+      <FilterBar>
+        <input
+          placeholder="Search demand by status or id"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+        />
+      </FilterBar>
+      {posts.length === 0 ? <EmptyState title="No demand posts yet" description="Create your first demand post above." /> : null}
+      <ul className="list desktop-list">
+        {posts
+          .filter((post) => `${post.id}`.includes(query) || `${post.status}`.toLowerCase().includes(query.toLowerCase()))
+          .map((post) => (
+            <li key={post.id} className="list-row">
+              <span>Demand #{post.id} product #{post.product} qty {post.target_quantity}</span>
+              <StatusBadge value={post.status} />
+            </li>
+          ))}
       </ul>
+      <div className="mobile-card-list">
+        {posts
+          .filter((post) => `${post.id}`.includes(query) || `${post.status}`.toLowerCase().includes(query.toLowerCase()))
+          .map((post) => (
+            <MobileDataCard
+              key={post.id}
+              title={`Demand #${post.id}`}
+              rows={[
+                { label: 'Product', value: `#${post.product}` },
+                { label: 'Quantity', value: post.target_quantity },
+                { label: 'Status', value: post.status },
+              ]}
+            />
+          ))}
+      </div>
     </section>
   )
 }

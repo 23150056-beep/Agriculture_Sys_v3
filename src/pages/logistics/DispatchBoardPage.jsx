@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react'
+import { ListChecks } from 'lucide-react'
 import { assignShipment, getPendingShipments, getShipments, getTrips, updateShipmentStatus } from '../../api/logisticsApi'
+import ErrorState from '../../components/common/ErrorState'
+import PageHeader from '../../components/common/PageHeader'
+import StatusBadge from '../../components/common/StatusBadge'
+import Toast from '../../components/common/Toast'
 import { getApiErrorMessage } from '../../utils/apiError'
 
 const SHIPMENT_STATUS_OPTIONS = ['SCHEDULED', 'LOADED', 'IN_TRANSIT', 'DELIVERED', 'DELAYED', 'FAILED']
@@ -89,10 +94,10 @@ function DispatchBoardPage() {
 
   return (
     <section className="panel">
-      <h2>Dispatch Board</h2>
+      <PageHeader icon={ListChecks} title="Dispatch Board" subtitle="Assign pending shipments and update shipment movement status." />
 
-      {message ? <p>{message}</p> : null}
-      {error ? <p className="error">{error}</p> : null}
+      <Toast message={message} type="success" />
+      {error ? <ErrorState message={error} /> : null}
 
       <h3>Pending Assignment</h3>
       <ul className="list">
@@ -121,7 +126,7 @@ function DispatchBoardPage() {
         {shipments.map((shipment) => (
           <li key={shipment.id} className={`list-row ${updatingShipmentId === shipment.id ? 'pending-row' : ''}`}>
             <span>
-              Shipment #{shipment.id} order #{shipment.order} status {shipment.status}
+              Shipment #{shipment.id} order #{shipment.order} status <StatusBadge value={shipment.status} />
               {updatingShipmentId === shipment.id ? <em className="sync-text"> Syncing...</em> : null}
             </span>
             <select

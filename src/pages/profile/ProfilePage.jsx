@@ -9,9 +9,11 @@ function ProfilePage({ user }) {
         title="Profile"
         subtitle="Your account identity and active system role."
       />
-      <p>Name: {user?.full_name || '-'}</p>
-      <p>Role: {user?.role || '-'}</p>
-      <p>Email: {user?.email || '-'}</p>
+      <div className="grid">
+        <article className="card"><strong>Name</strong><p>{user?.full_name || '-'}</p></article>
+        <article className="card"><strong>Role</strong><p>{user?.role || '-'}</p></article>
+        <article className="card"><strong>Email</strong><p>{user?.email || '-'}</p></article>
+      </div>
     </section>
   )
 }

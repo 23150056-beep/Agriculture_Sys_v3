@@ -1,13 +1,28 @@
 import { useEffect, useState } from 'react'
 import { ShoppingCart } from 'lucide-react'
 import { getSummary } from '../../api/dashboardApi'
+import EmptyState from '../../components/common/EmptyState'
+import ErrorState from '../../components/common/ErrorState'
+import KpiCard from '../../components/common/KpiCard'
 import PageHeader from '../../components/common/PageHeader'
+import SkeletonLoader from '../../components/common/SkeletonLoader'
 
 function BuyerDashboard() {
   const [totals, setTotals] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    getSummary().then(({ data }) => setTotals(data.totals)).catch(() => setTotals(null))
+    getSummary()
+      .then(({ data }) => {
+        setTotals(data.totals)
+        setError('')
+      })
+      .catch(() => {
+        setTotals(null)
+        setError('Failed to load dashboard summary')
+      })
+      .finally(() => setIsLoading(false))
   }, [])
 
   return (
@@ -17,13 +32,16 @@ function BuyerDashboard() {
         title="Buyer Dashboard"
         subtitle="Monitor orders and sourcing opportunities."
       />
-      {totals ? (
+      {isLoading ? <SkeletonLoader lines={3} /> : null}
+      {!isLoading && error ? <ErrorState message={error} /> : null}
+      {!isLoading && !error && totals ? (
         <div className="stats-grid">
-          <article className="card"><h3>Open Listings</h3><p>{totals.listings}</p></article>
-          <article className="card"><h3>Total Orders</h3><p>{totals.orders}</p></article>
-          <article className="card"><h3>Demand Posts</h3><p>{totals.demand_posts}</p></article>
+          <KpiCard label="Open Listings" value={totals.listings} />
+          <KpiCard label="Total Orders" value={totals.orders} />
+          <KpiCard label="Demand Posts" value={totals.demand_posts} />
         </div>
       ) : null}
+      {!isLoading && !error && !totals ? <EmptyState title="No buyer metrics yet" description="Metrics appear once data is available." /> : null}
     </div>
   )
 }

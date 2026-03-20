@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { PackagePlus } from 'lucide-react'
 import { getLocations, getProducts } from '../../api/catalogApi'
 import { createListing } from '../../api/listingsApi'
+import ErrorState from '../../components/common/ErrorState'
 import PageHeader from '../../components/common/PageHeader'
+import Toast from '../../components/common/Toast'
 
 function ListingFormPage() {
   const [products, setProducts] = useState([])
@@ -126,8 +128,8 @@ function ListingFormPage() {
 
         <button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Create Listing'}</button>
       </form>
-      {message ? <p>{message}</p> : null}
-      {error ? <p className="error">{error}</p> : null}
+      <Toast message={message} type="success" />
+      {error ? <ErrorState message={error} /> : null}
     </section>
   )
 }

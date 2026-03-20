@@ -3,10 +3,16 @@ import { ShoppingCart } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { getLocations } from '../../api/catalogApi'
 import { getListings } from '../../api/listingsApi'
+import DataTable from '../../components/common/DataTable'
+import EmptyState from '../../components/common/EmptyState'
+import ErrorState from '../../components/common/ErrorState'
+import FilterBar from '../../components/common/FilterBar'
+import MobileDataCard from '../../components/common/MobileDataCard'
 import { getMyOrders } from '../../api/ordersApi'
 import { createOrder } from '../../api/ordersApi'
 import StatusBadge from '../../components/common/StatusBadge'
 import PageHeader from '../../components/common/PageHeader'
+import Toast from '../../components/common/Toast'
 import { formatCurrency } from '../../utils/formatCurrency'
 
 function BuyerOrdersPage() {
@@ -21,6 +27,7 @@ function BuyerOrdersPage() {
     delivery_location: '',
     expected_delivery_date: '',
   })
+  const [query, setQuery] = useState('')
 
   const loadData = () => {
     Promise.all([getMyOrders(), getListings(), getLocations()])
@@ -101,19 +108,46 @@ function BuyerOrdersPage() {
         <button type="submit">Create Order</button>
       </form>
 
-      {message ? <p>{message}</p> : null}
-      {error ? <p className="error">{error}</p> : null}
+      <Toast message={message} type="success" />
+      {error ? <ErrorState message={error} /> : null}
 
       <p className="section-label">Order History</p>
-      <ul className="list">
-        {orders.map((order) => (
-          <li key={order.id}>
-            <Link to={`/orders/${order.id}`}>Order #{order.id}</Link>
-            <StatusBadge value={order.status} />
-            <span> Total: {formatCurrency(order.total_price)}</span>
-          </li>
-        ))}
-      </ul>
+      <FilterBar>
+        <input
+          placeholder="Search by order id or status"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+        />
+      </FilterBar>
+      <div className="desktop-list">
+        <DataTable
+          rowKey="id"
+          rows={orders.filter((order) => `${order.id}`.includes(query) || `${order.status}`.toLowerCase().includes(query.toLowerCase()))}
+          emptyFallback={<EmptyState title="No orders found" description="Create an order above to get started." />}
+          columns={[
+            { key: 'id', label: 'Order', render: (order) => <Link to={`/orders/${order.id}`}>#{order.id}</Link> },
+            { key: 'status', label: 'Status', render: (order) => <StatusBadge value={order.status} /> },
+            { key: 'total_price', label: 'Total', render: (order) => formatCurrency(order.total_price) },
+            { key: 'expected_delivery_date', label: 'Expected Delivery' },
+          ]}
+        />
+      </div>
+      <div className="mobile-card-list">
+        {orders
+          .filter((order) => `${order.id}`.includes(query) || `${order.status}`.toLowerCase().includes(query.toLowerCase()))
+          .map((order) => (
+            <MobileDataCard
+              key={order.id}
+              title={`Order #${order.id}`}
+              rows={[
+                { label: 'Status', value: order.status },
+                { label: 'Total', value: formatCurrency(order.total_price) },
+                { label: 'Expected', value: order.expected_delivery_date || 'N/A' },
+              ]}
+              actions={<Link to={`/orders/${order.id}`}>View Timeline</Link>}
+            />
+          ))}
+      </div>
     </section>
   )
 }

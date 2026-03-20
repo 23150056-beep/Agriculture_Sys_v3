@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Route } from 'lucide-react'
 import { capacityCheck, createTrip, getDrivers, getPendingShipments, getTrips, getVehicles } from '../../api/logisticsApi'
+import ErrorState from '../../components/common/ErrorState'
+import PageHeader from '../../components/common/PageHeader'
+import Toast from '../../components/common/Toast'
 import { getApiErrorMessage } from '../../utils/apiError'
 
 function TripPlannerPage() {
@@ -89,8 +93,7 @@ function TripPlannerPage() {
 
   return (
     <section className={`panel ${isCreatingTrip || isCheckingCapacity ? 'pending-row' : ''}`}>
-      <h2>Trip Planner</h2>
-      <p>Create trips and pre-check vehicle capacity against sample pending loads.</p>
+      <PageHeader icon={Route} title="Trip Planner" subtitle="Create trips and pre-check vehicle capacity against pending loads." />
       {isCreatingTrip || isCheckingCapacity ? <p className="sync-text">Syncing...</p> : null}
 
       <form className="inline-form" onSubmit={onCreateTrip}>
@@ -119,10 +122,10 @@ function TripPlannerPage() {
         </button>
       </form>
 
-      {capacityResult === true ? <p>Capacity check: PASS</p> : null}
-      {capacityResult === false ? <p className="error">Capacity check: EXCEEDED</p> : null}
-      {message ? <p>{message}</p> : null}
-      {error ? <p className="error">{error}</p> : null}
+      {capacityResult === true ? <Toast message="Capacity check: PASS" type="success" /> : null}
+      {capacityResult === false ? <ErrorState message="Capacity check: EXCEEDED" /> : null}
+      <Toast message={message} type="success" />
+      {error ? <ErrorState message={error} /> : null}
 
       <h3>Existing Trips</h3>
       <ul className="list">

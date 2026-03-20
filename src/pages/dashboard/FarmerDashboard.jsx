@@ -1,15 +1,31 @@
 import { useEffect, useState } from 'react'
 import { Tractor } from 'lucide-react'
 import { getFarmerOverview, getSummary } from '../../api/dashboardApi'
+import EmptyState from '../../components/common/EmptyState'
+import ErrorState from '../../components/common/ErrorState'
+import KpiCard from '../../components/common/KpiCard'
 import PageHeader from '../../components/common/PageHeader'
+import SkeletonLoader from '../../components/common/SkeletonLoader'
 
 function FarmerDashboard() {
   const [totals, setTotals] = useState(null)
   const [overview, setOverview] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    getSummary().then(({ data }) => setTotals(data.totals)).catch(() => setTotals(null))
-    getFarmerOverview().then(({ data }) => setOverview(data)).catch(() => setOverview(null))
+    Promise.all([getSummary(), getFarmerOverview()])
+      .then(([summaryResponse, overviewResponse]) => {
+        setTotals(summaryResponse.data.totals)
+        setOverview(overviewResponse.data)
+        setError('')
+      })
+      .catch(() => {
+        setTotals(null)
+        setOverview(null)
+        setError('Failed to load farmer overview')
+      })
+      .finally(() => setLoading(false))
   }, [])
 
   return (
@@ -19,11 +35,16 @@ function FarmerDashboard() {
         title="Farmer Dashboard"
         subtitle="Track listings, harvest plans, and active orders."
       />
-      <div className="stats-grid">
-        <article className="card"><h3>My Listings</h3><p>{overview?.my_listings ?? '-'}</p></article>
-        <article className="card"><h3>Orders On My Listings</h3><p>{overview?.orders_on_my_listings ?? '-'}</p></article>
-        <article className="card"><h3>Total Market Listings</h3><p>{totals?.listings ?? '-'}</p></article>
-      </div>
+      {loading ? <SkeletonLoader lines={3} /> : null}
+      {!loading && error ? <ErrorState message={error} /> : null}
+      {!loading && !error && (overview || totals) ? (
+        <div className="stats-grid">
+          <KpiCard label="My Listings" value={overview?.my_listings ?? '-'} />
+          <KpiCard label="Orders On My Listings" value={overview?.orders_on_my_listings ?? '-'} />
+          <KpiCard label="Total Market Listings" value={totals?.listings ?? '-'} />
+        </div>
+      ) : null}
+      {!loading && !error && !overview && !totals ? <EmptyState title="No farmer metrics" description="Metrics appear once listing and order data is present." /> : null}
     </div>
   )
 }

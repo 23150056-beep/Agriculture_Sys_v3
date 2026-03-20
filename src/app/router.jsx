@@ -1,6 +1,5 @@
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
-import Navbar from '../components/common/Navbar'
-import Sidebar from '../components/common/Sidebar'
+import AppShell from '../components/common/AppShell'
 import ProtectedRoute from '../components/common/ProtectedRoute'
 import LoginPage from '../pages/auth/LoginPage'
 import RegisterPage from '../pages/auth/RegisterPage'
@@ -30,29 +29,23 @@ function DashboardSwitch({ user }) {
 
 function AppLayout({ user, loading }) {
   return (
-    <div className="layout">
-      <Navbar user={user} />
-      <div className="shell">
-        <Sidebar user={user} />
-        <main>
-          <Routes>
-            <Route path="/dashboard" element={<DashboardSwitch user={user} />} />
-            <Route path="/marketplace" element={<MarketplacePage />} />
-            <Route path="/listings/farmer" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.FARMER, ROLES.ADMIN]}><FarmerListingsPage /></ProtectedRoute>} />
-            <Route path="/listings/new" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.FARMER, ROLES.ADMIN]}><ListingFormPage /></ProtectedRoute>} />
-            <Route path="/orders/buyer" element={<BuyerOrdersPage />} />
-            <Route path="/orders/farmer" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.FARMER, ROLES.ADMIN]}><FarmerOrdersPage /></ProtectedRoute>} />
-            <Route path="/orders/:id" element={<OrderDetailsPage />} />
-            <Route path="/logistics/dispatch-board" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.DISPATCHER, ROLES.ADMIN]}><DispatchBoardPage /></ProtectedRoute>} />
-            <Route path="/logistics/trip-planner" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.DISPATCHER, ROLES.ADMIN]}><TripPlannerPage /></ProtectedRoute>} />
-            <Route path="/logistics/shipment-tracking" element={<ShipmentTrackingPage />} />
-            <Route path="/demand-board" element={<DemandBoardPage />} />
-            <Route path="/profile" element={<ProfilePage user={user} />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </main>
-      </div>
-    </div>
+    <AppShell user={user}>
+      <Routes>
+        <Route path="/dashboard" element={<DashboardSwitch user={user} />} />
+        <Route path="/marketplace" element={<MarketplacePage />} />
+        <Route path="/listings/farmer" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.FARMER, ROLES.ADMIN]}><FarmerListingsPage /></ProtectedRoute>} />
+        <Route path="/listings/new" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.FARMER, ROLES.ADMIN]}><ListingFormPage /></ProtectedRoute>} />
+        <Route path="/orders/buyer" element={<BuyerOrdersPage />} />
+        <Route path="/orders/farmer" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.FARMER, ROLES.ADMIN]}><FarmerOrdersPage /></ProtectedRoute>} />
+        <Route path="/orders/:id" element={<OrderDetailsPage />} />
+        <Route path="/logistics/dispatch-board" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.DISPATCHER, ROLES.ADMIN]}><DispatchBoardPage /></ProtectedRoute>} />
+        <Route path="/logistics/trip-planner" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.DISPATCHER, ROLES.ADMIN]}><TripPlannerPage /></ProtectedRoute>} />
+        <Route path="/logistics/shipment-tracking" element={<ShipmentTrackingPage />} />
+        <Route path="/demand-board" element={<DemandBoardPage />} />
+        <Route path="/profile" element={<ProfilePage user={user} />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </AppShell>
   )
 }
 
