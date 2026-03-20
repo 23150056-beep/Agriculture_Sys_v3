@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
 import { MapPinned } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import { createProofOfDelivery, getShipments, updateShipmentStatus } from '../../api/logisticsApi'
 import ErrorState from '../../components/common/ErrorState'
+import FilterBar from '../../components/common/FilterBar'
+import EmptyState from '../../components/common/EmptyState'
 import PageHeader from '../../components/common/PageHeader'
 import ProgressStepper from '../../components/common/ProgressStepper'
 import StatusBadge from '../../components/common/StatusBadge'
@@ -12,9 +15,12 @@ const STATUS_OPTIONS = ['SCHEDULED', 'LOADED', 'IN_TRANSIT', 'DELAYED', 'FAILED'
 const SHIPMENT_STEPS = ['SCHEDULED', 'LOADED', 'IN_TRANSIT', 'DELIVERED']
 
 function ShipmentTrackingPage() {
+  const [searchParams] = useSearchParams()
   const [shipments, setShipments] = useState([])
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [query, setQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState('ALL')
   const [updatingShipmentId, setUpdatingShipmentId] = useState(null)
   const [podSubmittingShipmentId, setPodSubmittingShipmentId] = useState(null)
 
@@ -37,6 +43,21 @@ function ShipmentTrackingPage() {
 
     return () => clearTimeout(timer)
   }, [message, error])
+
+  useEffect(() => {
+    const nextQuery = searchParams.get('q') || ''
+    const nextStatus = searchParams.get('status') || 'ALL'
+    setQuery(nextQuery)
+    setStatusFilter(nextStatus)
+  }, [searchParams])
+
+  const statuses = ['ALL', ...new Set(shipments.map((shipment) => shipment.status))]
+  const filteredShipments = shipments.filter((shipment) => {
+    const textMatch = `${shipment.id}`.includes(query) || `${shipment.order}`.includes(query) || `${shipment.status}`.toLowerCase().includes(query.toLowerCase())
+    if (!textMatch) return false
+    if (statusFilter === 'ALL') return true
+    return shipment.status === statusFilter
+  })
 
   const onStatusChange = async (shipmentId, status) => {
     setError('')
@@ -89,8 +110,28 @@ function ShipmentTrackingPage() {
       <Toast message={message} type="success" />
       {error ? <ErrorState message={error} /> : null}
 
+      <FilterBar>
+        <input
+          placeholder="Search shipment by id, order, or status"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+        />
+        <div className="chip-row">
+          {statuses.map((status) => (
+            <button
+              key={status}
+              type="button"
+              className={`chip ${statusFilter === status ? 'active' : ''}`}
+              onClick={() => setStatusFilter(status)}
+            >
+              {status}
+            </button>
+          ))}
+        </div>
+      </FilterBar>
+
       <ul className="list">
-        {shipments.map((shipment) => (
+        {filteredShipments.map((shipment) => (
           <li key={shipment.id} className={`card ${updatingShipmentId === shipment.id || podSubmittingShipmentId === shipment.id ? 'pending-row' : ''}`}>
             <div className="list-row">
               <span>
@@ -122,6 +163,7 @@ function ShipmentTrackingPage() {
           </li>
         ))}
       </ul>
+      {shipments.length > 0 && filteredShipments.length === 0 ? <EmptyState title="No matching shipments" description="Try another status or search text." /> : null}
     </section>
   )
 }
