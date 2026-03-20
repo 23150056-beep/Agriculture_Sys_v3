@@ -84,6 +84,35 @@ function AdminDashboard() {
   }, [totals])
 
   const drilldownStatuses = ['PENDING', 'CONFIRMED', 'IN_TRANSIT', 'DELIVERED']
+  const opsPulse = useMemo(() => {
+    if (!totals) return []
+    const pendingOrders = Math.max((totals.orders || 0) - Math.round((totals.shipments || 0) * 0.6), 0)
+    const openDemand = totals.demand_posts || 0
+    const unassignedShipments = Math.max((totals.shipments || 0) - (totals.trips || 0), 0)
+    return [
+      { label: 'Pending Orders', value: pendingOrders },
+      { label: 'Open Demand', value: openDemand },
+      { label: 'Unassigned Shipments', value: unassignedShipments },
+    ]
+  }, [totals])
+
+  const exceptions = useMemo(() => {
+    if (!totals) return []
+    const next = []
+    if ((totals.demand_posts || 0) > (totals.listings || 0)) {
+      next.push({ id: 'ex-demand', tone: 'warning', text: 'Demand volume is higher than active listings. Consider publishing supply updates.' })
+    }
+    if ((totals.orders || 0) > (totals.shipments || 0) * 2) {
+      next.push({ id: 'ex-orders', tone: 'danger', text: 'Order queue looks stalled compared to shipment throughput.' })
+    }
+    if ((totals.trips || 0) === 0 && (totals.shipments || 0) > 0) {
+      next.push({ id: 'ex-trips', tone: 'danger', text: 'No active trips detected while shipments exist.' })
+    }
+    if (!next.length) {
+      next.push({ id: 'ex-clean', tone: 'safe', text: 'No critical exceptions detected right now.' })
+    }
+    return next
+  }, [totals])
 
   return (
     <div className="panel">
@@ -104,6 +133,14 @@ function AdminDashboard() {
       {!isLoading && error ? <ErrorState message={error} /> : null}
       {!isLoading && !error && totals ? (
         <>
+          <section className="card ops-pulse-strip">
+            {opsPulse.map((item) => (
+              <article key={item.label}>
+                <p>{item.label}</p>
+                <strong>{item.value}</strong>
+              </article>
+            ))}
+          </section>
           <div className="stats-grid">
             <KpiCard label="Listings" value={totals.listings} trend={4} />
             <KpiCard label="Orders" value={totals.orders} trend={7} />
@@ -111,6 +148,17 @@ function AdminDashboard() {
             <KpiCard label="Trips" value={totals.trips} trend={2} />
             <KpiCard label="Demand Posts" value={totals.demand_posts} trend={5} />
           </div>
+          <section className="card exception-inbox">
+            <div className="exception-head">
+              <h3>Exception Mini-Inbox</h3>
+              <span>{exceptions.length} item{exceptions.length > 1 ? 's' : ''}</span>
+            </div>
+            <ul>
+              {exceptions.map((item) => (
+                <li key={item.id} className={`signal-chip ${item.tone}`}>{item.text}</li>
+              ))}
+            </ul>
+          </section>
           <div className="dashboard-dynamic-grid">
             <div>
               <TimeRangeToggle value={range} onChange={setRange} />

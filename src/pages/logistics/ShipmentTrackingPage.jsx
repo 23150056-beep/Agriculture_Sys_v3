@@ -11,6 +11,8 @@ import ProgressStepper from '../../components/common/ProgressStepper'
 import StatusBadge from '../../components/common/StatusBadge'
 import Toast from '../../components/common/Toast'
 import { getApiErrorMessage } from '../../utils/apiError'
+import { addActivityLog } from '../../utils/activityLog'
+import { getShipmentDelayRisk } from '../../utils/prototypeSignals'
 
 const STATUS_OPTIONS = ['SCHEDULED', 'LOADED', 'IN_TRANSIT', 'DELAYED', 'FAILED', 'DELIVERED']
 const SHIPMENT_STEPS = ['SCHEDULED', 'LOADED', 'IN_TRANSIT', 'DELIVERED']
@@ -74,6 +76,7 @@ function ShipmentTrackingPage() {
     try {
       await updateShipmentStatus(shipmentId, { status })
       setMessage(`Shipment #${shipmentId} status set to ${status}`)
+      addActivityLog({ title: `Shipment #${shipmentId} moved to ${status}` })
       loadData()
     } catch (error) {
       setShipments(previousShipments)
@@ -96,6 +99,7 @@ function ShipmentTrackingPage() {
         return { ...item, status: 'DELIVERED' }
       }))
       setMessage(`Proof of delivery uploaded for shipment #${shipmentId}`)
+      addActivityLog({ title: `Proof of delivery uploaded for shipment #${shipmentId}` })
       event.currentTarget.reset()
       loadData()
     } catch (error) {
@@ -155,6 +159,8 @@ function ShipmentTrackingPage() {
             <div className="list-row">
               <span>
                 Shipment #{shipment.id} order #{shipment.order} status <StatusBadge value={shipment.status} />
+                {' '}
+                <em className={`signal-chip ${getShipmentDelayRisk(shipment).tone}`}>Delay risk: {getShipmentDelayRisk(shipment).label}</em>
                 {updatingShipmentId === shipment.id || podSubmittingShipmentId === shipment.id ? <em className="sync-text"> Syncing...</em> : null}
               </span>
               <select

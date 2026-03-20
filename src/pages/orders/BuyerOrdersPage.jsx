@@ -21,6 +21,8 @@ import Toast from '../../components/common/Toast'
 import { formatCurrency } from '../../utils/formatCurrency'
 import { ORDER_STATUSES } from '../../utils/constants'
 import heroImage from '../../assets/hero.png'
+import { addActivityLog } from '../../utils/activityLog'
+import { getOrderReadiness } from '../../utils/prototypeSignals'
 import { getProduceFallbackImage } from '../../utils/produceImage'
 import useAutoRefresh from '../../hooks/useAutoRefresh'
 import useSavedViews from '../../hooks/useSavedViews'
@@ -138,6 +140,7 @@ function BuyerOrdersPage() {
         expected_delivery_date: form.expected_delivery_date,
       })
       setMessage('Order created successfully')
+      addActivityLog({ title: `Buyer order created for listing #${form.listing} qty ${form.quantity}` })
       loadData()
     } catch {
       setError('Failed to create order. Check quantity and required fields.')
@@ -254,6 +257,14 @@ function BuyerOrdersPage() {
             },
             { key: 'product', label: 'Product', render: (order) => getOrderProductName(order) },
             { key: 'status', label: 'Status', render: (order) => <StatusBadge value={order.status} /> },
+            {
+              key: 'readiness',
+              label: 'Readiness',
+              render: (order) => {
+                const readiness = getOrderReadiness(order)
+                return <span className={`signal-chip ${readiness.tone}`}>{readiness.label}</span>
+              },
+            },
             { key: 'lifecycle', label: 'Lifecycle', render: (order) => <ProgressStepper steps={ORDER_STATUSES} current={order.status} /> },
             { key: 'total_price', label: 'Total', render: (order) => formatCurrency(order.total_price) },
             { key: 'expected_delivery_date', label: 'Expected Delivery' },
@@ -269,6 +280,7 @@ function BuyerOrdersPage() {
             title={`Order #${order.id} - ${getOrderProductName(order)}`}
           >
             <p><strong>Status:</strong> {order.status}</p>
+            <p><strong>Readiness:</strong> <span className={`signal-chip ${getOrderReadiness(order).tone}`}>{getOrderReadiness(order).label}</span></p>
             <p><strong>Total:</strong> {formatCurrency(order.total_price)}</p>
             <p><strong>Expected:</strong> {order.expected_delivery_date || 'N/A'}</p>
             <ProgressStepper steps={ORDER_STATUSES} current={order.status} />

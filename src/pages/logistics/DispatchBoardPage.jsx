@@ -6,6 +6,8 @@ import PageHeader from '../../components/common/PageHeader'
 import StatusBadge from '../../components/common/StatusBadge'
 import Toast from '../../components/common/Toast'
 import { getApiErrorMessage } from '../../utils/apiError'
+import { addActivityLog } from '../../utils/activityLog'
+import { getShipmentDelayRisk } from '../../utils/prototypeSignals'
 
 const SHIPMENT_STATUS_OPTIONS = ['SCHEDULED', 'LOADED', 'IN_TRANSIT', 'DELIVERED', 'DELAYED', 'FAILED']
 
@@ -59,6 +61,7 @@ function DispatchBoardPage() {
     try {
       await assignShipment({ shipment_id: shipmentId, trip_id: Number(tripId) })
       setMessage(`Shipment #${shipmentId} assigned`)
+      addActivityLog({ title: `Dispatcher assigned shipment #${shipmentId} to trip #${tripId}` })
       loadData()
     } catch (error) {
       setShipments(previousShipments)
@@ -83,6 +86,7 @@ function DispatchBoardPage() {
     try {
       await updateShipmentStatus(shipmentId, { status })
       setMessage(`Shipment #${shipmentId} updated to ${status}`)
+      addActivityLog({ title: `Dispatcher updated shipment #${shipmentId} to ${status}` })
       loadData()
     } catch (error) {
       setShipments(previousShipments)
@@ -127,6 +131,8 @@ function DispatchBoardPage() {
           <li key={shipment.id} className={`list-row ${updatingShipmentId === shipment.id ? 'pending-row' : ''}`}>
             <span>
               Shipment #{shipment.id} order #{shipment.order} status <StatusBadge value={shipment.status} />
+              {' '}
+              <em className={`signal-chip ${getShipmentDelayRisk(shipment).tone}`}>Delay risk: {getShipmentDelayRisk(shipment).label}</em>
               {updatingShipmentId === shipment.id ? <em className="sync-text"> Syncing...</em> : null}
             </span>
             <select

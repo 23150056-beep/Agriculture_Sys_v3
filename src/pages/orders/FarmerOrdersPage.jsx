@@ -15,6 +15,8 @@ import PageHeader from '../../components/common/PageHeader'
 import StatusBadge from '../../components/common/StatusBadge'
 import Toast from '../../components/common/Toast'
 import heroImage from '../../assets/hero.png'
+import { addActivityLog } from '../../utils/activityLog'
+import { getOrderReadiness } from '../../utils/prototypeSignals'
 import { getProduceFallbackImage } from '../../utils/produceImage'
 import useAutoRefresh from '../../hooks/useAutoRefresh'
 import useSavedViews from '../../hooks/useSavedViews'
@@ -140,6 +142,7 @@ function FarmerOrdersPage() {
 
     if (successCount > 0) {
       setMessage(`${successCount} order${successCount > 1 ? 's' : ''} updated to ${bulkStatus}`)
+      addActivityLog({ title: `Farmer bulk-updated ${successCount} order${successCount > 1 ? 's' : ''} to ${bulkStatus}` })
     }
     if (failedCount > 0) {
       setError(`${failedCount} update${failedCount > 1 ? 's' : ''} failed due to transition rules or server validation.`)
@@ -159,6 +162,7 @@ function FarmerOrdersPage() {
     try {
       await updateOrderStatus(orderId, { status, note: 'Updated by farmer module' })
       setMessage(`Order #${orderId} updated to ${status}`)
+      addActivityLog({ title: `Farmer updated order #${orderId} to ${status}` })
       refreshNow()
     } catch {
       setError('Could not update order status. Ensure transition is valid.')
@@ -279,6 +283,14 @@ function FarmerOrdersPage() {
             { key: 'product', label: 'Product', render: (order) => getOrderProductName(order) },
             { key: 'status', label: 'Status', render: (order) => <StatusBadge value={order.status} /> },
             {
+              key: 'readiness',
+              label: 'Readiness',
+              render: (order) => {
+                const readiness = getOrderReadiness(order)
+                return <span className={`signal-chip ${readiness.tone}`}>{readiness.label}</span>
+              },
+            },
+            {
               key: 'action',
               label: 'Update',
               render: (order) => (
@@ -310,6 +322,7 @@ function FarmerOrdersPage() {
               Select for bulk update
             </label>
             <p><strong>Status:</strong> {order.status}</p>
+            <p><strong>Readiness:</strong> <span className={`signal-chip ${getOrderReadiness(order).tone}`}>{getOrderReadiness(order).label}</span></p>
             <select defaultValue="" onChange={(event) => onStatusChange(order.id, event.target.value)}>
               <option value="" disabled>Update status</option>
               {STATUS_OPTIONS.map((status) => (

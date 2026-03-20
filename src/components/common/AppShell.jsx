@@ -4,6 +4,7 @@ import { ROLES } from '../../utils/constants'
 import useDensityMode from '../../hooks/useDensityMode'
 import useKeyboardShortcuts from '../../hooks/useKeyboardShortcuts'
 import CommandPalette from '../dynamic/CommandPalette'
+import MobileBottomNav from './MobileBottomNav'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
 
@@ -65,6 +66,7 @@ function AppShell({ user, children }) {
         <Sidebar user={user} />
         <main>{children}</main>
       </div>
+      <MobileBottomNav user={user} />
       <CommandPalette
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}

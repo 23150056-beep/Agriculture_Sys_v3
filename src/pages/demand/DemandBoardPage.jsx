@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Megaphone } from 'lucide-react'
 import { getLocations, getProducts } from '../../api/catalogApi'
 import { createDemandPost, getDemandPosts } from '../../api/demandApi'
+import { getListings } from '../../api/listingsApi'
 import EmptyState from '../../components/common/EmptyState'
 import EmptyIllustrationState from '../../components/common/EmptyIllustrationState'
 import ErrorState from '../../components/common/ErrorState'
@@ -15,11 +16,14 @@ import SavedViewPicker from '../../components/dynamic/SavedViewPicker'
 import StatusBadge from '../../components/common/StatusBadge'
 import Toast from '../../components/common/Toast'
 import heroImage from '../../assets/hero.png'
+import { addActivityLog } from '../../utils/activityLog'
+import { getDemandListingMatch } from '../../utils/prototypeSignals'
 import useAutoRefresh from '../../hooks/useAutoRefresh'
 import useSavedViews from '../../hooks/useSavedViews'
 
 function DemandBoardPage() {
   const [posts, setPosts] = useState([])
+  const [listings, setListings] = useState([])
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [viewMode, setViewMode] = useState('list')
@@ -48,10 +52,11 @@ function DemandBoardPage() {
 
   const loadData = useCallback(async () => {
     try {
-      const [postsResponse, productsResponse, locationsResponse] = await Promise.all([getDemandPosts(), getProducts(), getLocations()])
+      const [postsResponse, productsResponse, locationsResponse, listingsResponse] = await Promise.all([getDemandPosts(), getProducts(), getLocations(), getListings()])
       setPosts(postsResponse.data)
       setProducts(productsResponse.data)
       setLocations(locationsResponse.data)
+      setListings(listingsResponse.data)
       setError('')
     } catch {
       setError('Failed to load demand data')
@@ -104,6 +109,7 @@ function DemandBoardPage() {
         location: Number(form.location),
       })
       setMessage('Demand post created')
+      addActivityLog({ title: `Demand post created for product #${form.product || '-'} with target qty ${form.target_quantity}` })
       loadData()
     } catch {
       setError('Failed to create demand post. Buyer role is required.')
@@ -215,7 +221,13 @@ function DemandBoardPage() {
         <ul className="list desktop-list">
           {filteredPosts.map((post) => (
             <li key={post.id} className="list-row">
-              <span>Demand #{post.id} product #{post.product} qty {post.target_quantity}</span>
+              <span>
+                Demand #{post.id} product #{post.product} qty {post.target_quantity}
+                {(() => {
+                  const match = getDemandListingMatch(post, listings)
+                  return <em className={`signal-chip ${match.score >= 75 ? 'safe' : match.score >= 45 ? 'warning' : 'danger'}`}>Match {match.score}% ({match.label})</em>
+                })()}
+              </span>
               <StatusBadge value={post.status} />
             </li>
           ))}
@@ -231,6 +243,10 @@ function DemandBoardPage() {
                     <p><strong>Demand #{post.id}</strong></p>
                     <p>Product #{post.product}</p>
                     <p>Qty {post.target_quantity}</p>
+                    {(() => {
+                      const match = getDemandListingMatch(post, listings)
+                      return <p><small>Match score: {match.score}% ({match.label})</small></p>
+                    })()}
                   </article>
                 ))}
               </div>
@@ -247,6 +263,7 @@ function DemandBoardPage() {
                 { label: 'Product', value: `#${post.product}` },
                 { label: 'Quantity', value: post.target_quantity },
                 { label: 'Status', value: post.status },
+                { label: 'Match', value: `${getDemandListingMatch(post, listings).score}%` },
               ]}
             />
         ))}
