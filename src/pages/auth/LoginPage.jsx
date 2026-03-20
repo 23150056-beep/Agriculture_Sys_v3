@@ -3,6 +3,7 @@ import { LogIn } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { loginUser } from '../../api/authApi'
 import { isDemoMode, setStoredDemoUser, tryDemoLogin } from '../../utils/demoAuth'
+import heroImage from '../../assets/hero.png'
 
 function LoginPage() {
   const navigate = useNavigate()
@@ -45,6 +46,9 @@ function LoginPage() {
 
   return (
     <section className="auth-card">
+      <div className="auth-visual">
+        <img src={heroImage} alt="Agriculture platform" loading="lazy" />
+      </div>
       <h1 className="auth-title"><LogIn size={19} /> Login</h1>
       <p className="auth-subtitle">Access your dashboard, operations, and marketplace modules.</p>
       <form onSubmit={onSubmit}>

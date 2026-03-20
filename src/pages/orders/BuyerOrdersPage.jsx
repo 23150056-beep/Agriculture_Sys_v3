@@ -10,10 +10,12 @@ import FilterBar from '../../components/common/FilterBar'
 import MobileDataCard from '../../components/common/MobileDataCard'
 import { getMyOrders } from '../../api/ordersApi'
 import { createOrder } from '../../api/ordersApi'
+import ProgressStepper from '../../components/common/ProgressStepper'
 import StatusBadge from '../../components/common/StatusBadge'
 import PageHeader from '../../components/common/PageHeader'
 import Toast from '../../components/common/Toast'
 import { formatCurrency } from '../../utils/formatCurrency'
+import { ORDER_STATUSES } from '../../utils/constants'
 
 function BuyerOrdersPage() {
   const [orders, setOrders] = useState([])
@@ -127,6 +129,7 @@ function BuyerOrdersPage() {
           columns={[
             { key: 'id', label: 'Order', render: (order) => <Link to={`/orders/${order.id}`}>#{order.id}</Link> },
             { key: 'status', label: 'Status', render: (order) => <StatusBadge value={order.status} /> },
+            { key: 'lifecycle', label: 'Lifecycle', render: (order) => <ProgressStepper steps={ORDER_STATUSES} current={order.status} /> },
             { key: 'total_price', label: 'Total', render: (order) => formatCurrency(order.total_price) },
             { key: 'expected_delivery_date', label: 'Expected Delivery' },
           ]}
@@ -144,7 +147,12 @@ function BuyerOrdersPage() {
                 { label: 'Total', value: formatCurrency(order.total_price) },
                 { label: 'Expected', value: order.expected_delivery_date || 'N/A' },
               ]}
-              actions={<Link to={`/orders/${order.id}`}>View Timeline</Link>}
+              actions={
+                <>
+                  <ProgressStepper steps={ORDER_STATUSES} current={order.status} />
+                  <Link to={`/orders/${order.id}`}>View Timeline</Link>
+                </>
+              }
             />
           ))}
       </div>

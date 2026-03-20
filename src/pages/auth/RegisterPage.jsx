@@ -5,6 +5,7 @@ import { registerUser } from '../../api/authApi'
 import ErrorState from '../../components/common/ErrorState'
 import { ROLES } from '../../utils/constants'
 import Toast from '../../components/common/Toast'
+import heroImage from '../../assets/hero.png'
 
 function RegisterPage() {
   const navigate = useNavigate()
@@ -31,6 +32,9 @@ function RegisterPage() {
 
   return (
     <section className="auth-card">
+      <div className="auth-visual">
+        <img src={heroImage} alt="Agriculture platform" loading="lazy" />
+      </div>
       <h1 className="auth-title"><UserPlus size={19} /> Register</h1>
       <p className="auth-subtitle">Create an account with your role to access module-specific workflows.</p>
       <form onSubmit={onSubmit}>

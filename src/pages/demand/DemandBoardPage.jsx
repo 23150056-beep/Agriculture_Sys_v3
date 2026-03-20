@@ -3,16 +3,20 @@ import { Megaphone } from 'lucide-react'
 import { getLocations, getProducts } from '../../api/catalogApi'
 import { createDemandPost, getDemandPosts } from '../../api/demandApi'
 import EmptyState from '../../components/common/EmptyState'
+import EmptyIllustrationState from '../../components/common/EmptyIllustrationState'
 import ErrorState from '../../components/common/ErrorState'
 import FilterBar from '../../components/common/FilterBar'
 import MobileDataCard from '../../components/common/MobileDataCard'
 import PageHeader from '../../components/common/PageHeader'
 import StatusBadge from '../../components/common/StatusBadge'
 import Toast from '../../components/common/Toast'
+import heroImage from '../../assets/hero.png'
 
 function DemandBoardPage() {
   const [posts, setPosts] = useState([])
   const [query, setQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState('ALL')
+  const [viewMode, setViewMode] = useState('list')
   const [products, setProducts] = useState([])
   const [locations, setLocations] = useState([])
   const [message, setMessage] = useState('')
@@ -75,6 +79,14 @@ function DemandBoardPage() {
     }
   }
 
+  const filteredPosts = posts.filter((post) => {
+    const matchesQuery = `${post.id}`.includes(query) || `${post.status}`.toLowerCase().includes(query.toLowerCase())
+    const matchesStatus = statusFilter === 'ALL' || post.status === statusFilter
+    return matchesQuery && matchesStatus
+  })
+
+  const statuses = ['ALL', ...new Set(posts.map((post) => post.status))]
+
   return (
     <section className="panel">
       <PageHeader
@@ -113,22 +125,53 @@ function DemandBoardPage() {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
+        <div className="chip-row">
+          {statuses.map((status) => (
+            <button
+              key={status}
+              type="button"
+              className={`chip ${statusFilter === status ? 'active' : ''}`}
+              onClick={() => setStatusFilter(status)}
+            >
+              {status}
+            </button>
+          ))}
+        </div>
+        <div className="chip-row">
+          <button type="button" className={`chip ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')}>List</button>
+          <button type="button" className={`chip ${viewMode === 'kanban' ? 'active' : ''}`} onClick={() => setViewMode('kanban')}>Kanban</button>
+        </div>
       </FilterBar>
-      {posts.length === 0 ? <EmptyState title="No demand posts yet" description="Create your first demand post above." /> : null}
-      <ul className="list desktop-list">
-        {posts
-          .filter((post) => `${post.id}`.includes(query) || `${post.status}`.toLowerCase().includes(query.toLowerCase()))
-          .map((post) => (
+      {posts.length === 0 ? <EmptyIllustrationState imageSrc={heroImage} title="No demand posts yet" description="Create your first demand post above." /> : null}
+      {viewMode === 'list' ? (
+        <ul className="list desktop-list">
+          {filteredPosts.map((post) => (
             <li key={post.id} className="list-row">
               <span>Demand #{post.id} product #{post.product} qty {post.target_quantity}</span>
               <StatusBadge value={post.status} />
             </li>
           ))}
-      </ul>
+        </ul>
+      ) : (
+        <div className="kanban-board">
+          {statuses.filter((item) => item !== 'ALL').map((status) => (
+            <section key={status} className="card kanban-col">
+              <h3>{status}</h3>
+              <div className="kanban-stack">
+                {filteredPosts.filter((post) => post.status === status).map((post) => (
+                  <article key={post.id} className="kanban-card" draggable>
+                    <p><strong>Demand #{post.id}</strong></p>
+                    <p>Product #{post.product}</p>
+                    <p>Qty {post.target_quantity}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
       <div className="mobile-card-list">
-        {posts
-          .filter((post) => `${post.id}`.includes(query) || `${post.status}`.toLowerCase().includes(query.toLowerCase()))
-          .map((post) => (
+        {filteredPosts.map((post) => (
             <MobileDataCard
               key={post.id}
               title={`Demand #${post.id}`}
@@ -138,8 +181,9 @@ function DemandBoardPage() {
                 { label: 'Status', value: post.status },
               ]}
             />
-          ))}
+        ))}
       </div>
+      {posts.length > 0 && filteredPosts.length === 0 ? <EmptyState title="No demand items match" description="Try clearing filters or search text." /> : null}
     </section>
   )
 }

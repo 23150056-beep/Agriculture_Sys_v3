@@ -3,11 +3,13 @@ import { MapPinned } from 'lucide-react'
 import { createProofOfDelivery, getShipments, updateShipmentStatus } from '../../api/logisticsApi'
 import ErrorState from '../../components/common/ErrorState'
 import PageHeader from '../../components/common/PageHeader'
+import ProgressStepper from '../../components/common/ProgressStepper'
 import StatusBadge from '../../components/common/StatusBadge'
 import Toast from '../../components/common/Toast'
 import { getApiErrorMessage } from '../../utils/apiError'
 
 const STATUS_OPTIONS = ['SCHEDULED', 'LOADED', 'IN_TRANSIT', 'DELAYED', 'FAILED', 'DELIVERED']
+const SHIPMENT_STEPS = ['SCHEDULED', 'LOADED', 'IN_TRANSIT', 'DELIVERED']
 
 function ShipmentTrackingPage() {
   const [shipments, setShipments] = useState([])
@@ -116,6 +118,7 @@ function ShipmentTrackingPage() {
                 {podSubmittingShipmentId === shipment.id ? 'Uploading...' : 'Upload POD'}
               </button>
             </form>
+            <ProgressStepper steps={SHIPMENT_STEPS} current={SHIPMENT_STEPS.includes(shipment.status) ? shipment.status : 'SCHEDULED'} />
           </li>
         ))}
       </ul>

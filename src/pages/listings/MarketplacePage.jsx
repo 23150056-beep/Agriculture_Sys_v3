@@ -3,18 +3,34 @@ import { Store } from 'lucide-react'
 import DataTable from '../../components/common/DataTable'
 import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
-import MobileDataCard from '../../components/common/MobileDataCard'
+import ImageCard from '../../components/common/ImageCard'
 import { getListings } from '../../api/listingsApi'
 import PageHeader from '../../components/common/PageHeader'
+import heroImage from '../../assets/hero.png'
 import { formatCurrency } from '../../utils/formatCurrency'
 
 function MarketplacePage() {
   const [listings, setListings] = useState([])
   const [query, setQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
+  const [expandedId, setExpandedId] = useState(null)
+  const [chipFilter, setChipFilter] = useState('ALL')
 
   useEffect(() => {
     getListings().then(({ data }) => setListings(data)).catch(() => setListings([]))
   }, [])
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(query), 220)
+    return () => clearTimeout(timer)
+  }, [query])
+
+  const filteredListings = listings.filter((item) => {
+    const matchesText = `${item.product_name || item.product}`.toLowerCase().includes(debouncedQuery.toLowerCase())
+    if (chipFilter === 'ALL') return matchesText
+    if (chipFilter === 'URGENT') return matchesText && item.urgent_sale
+    return matchesText && !item.urgent_sale
+  })
 
   return (
     <section className="panel">
@@ -29,32 +45,76 @@ function MarketplacePage() {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
+        <div className="chip-row">
+          <button type="button" className={`chip ${chipFilter === 'ALL' ? 'active' : ''}`} onClick={() => setChipFilter('ALL')}>All</button>
+          <button type="button" className={`chip ${chipFilter === 'URGENT' ? 'active' : ''}`} onClick={() => setChipFilter('URGENT')}>Urgent</button>
+          <button type="button" className={`chip ${chipFilter === 'NORMAL' ? 'active' : ''}`} onClick={() => setChipFilter('NORMAL')}>Normal</button>
+        </div>
       </FilterBar>
       <div className="desktop-list">
         <DataTable
           rowKey="id"
-          rows={listings.filter((item) => `${item.product_name || item.product}`.toLowerCase().includes(query.toLowerCase()))}
+          rows={filteredListings}
           emptyFallback={<EmptyState title="No listings found" description="Try adjusting your search." />}
           columns={[
             { key: 'id', label: 'ID', render: (item) => `#${item.id}` },
+            {
+              key: 'thumbnail',
+              label: 'Image',
+              render: (item) => (
+                <img
+                  className="table-thumb"
+                  src={item.images?.[0]?.image || heroImage}
+                  alt={item.product_name || `Product ${item.product}`}
+                  loading="lazy"
+                  onError={(event) => { event.currentTarget.src = heroImage }}
+                />
+              ),
+            },
             { key: 'product_name', label: 'Item', render: (item) => item.product_name || `Product #${item.product}` },
             { key: 'quantity_available', label: 'Quantity', render: (item) => `${item.quantity_available} ${item.unit}` },
             { key: 'unit_price', label: 'Price', render: (item) => formatCurrency(item.unit_price) },
             { key: 'urgent_sale', label: 'Status', render: (item) => (item.urgent_sale ? 'Urgent Sale' : 'Normal') },
+            {
+              key: 'expand',
+              label: 'Details',
+              render: (item) => (
+                <button type="button" onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}>
+                  {expandedId === item.id ? 'Hide' : 'Expand'}
+                </button>
+              ),
+            },
           ]}
         />
+        {expandedId ? (
+          <article className="card listing-expanded">
+            {(() => {
+              const active = filteredListings.find((entry) => entry.id === expandedId)
+              if (!active) return null
+              return (
+                <>
+                  <h3>{active.product_name || `Product #${active.product}`}</h3>
+                  <p>Quality: {active.quality_grade || 'N/A'}</p>
+                  <p>Available until: {active.available_until || 'N/A'}</p>
+                  <p>Farmer: {active.farmer_name || 'N/A'}</p>
+                </>
+              )
+            })()}
+          </article>
+        ) : null}
       </div>
       <div className="mobile-card-list">
-        {listings.filter((item) => `${item.product_name || item.product}`.toLowerCase().includes(query.toLowerCase())).map((item) => (
-          <MobileDataCard
+        {filteredListings.map((item) => (
+          <ImageCard
             key={item.id}
+            image={item.images?.[0]?.image}
+            fallback={heroImage}
             title={item.product_name || `Product #${item.product}`}
-            rows={[
-              { label: 'Quantity', value: `${item.quantity_available} ${item.unit}` },
-              { label: 'Price', value: formatCurrency(item.unit_price) },
-              { label: 'Status', value: item.urgent_sale ? 'Urgent Sale' : 'Normal' },
-            ]}
-          />
+          >
+            <p><strong>Quantity:</strong> {item.quantity_available} {item.unit}</p>
+            <p><strong>Price:</strong> {formatCurrency(item.unit_price)}</p>
+            <p><strong>Status:</strong> {item.urgent_sale ? 'Urgent Sale' : 'Normal'}</p>
+          </ImageCard>
         ))}
       </div>
     </section>
