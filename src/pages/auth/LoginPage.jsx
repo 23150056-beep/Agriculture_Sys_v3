@@ -46,12 +46,14 @@ function LoginPage() {
   return (
     <section className="auth-card">
       <h1 className="auth-title"><LogIn size={19} /> Login</h1>
+      <p className="auth-subtitle">Access your dashboard, operations, and marketplace modules.</p>
       <form onSubmit={onSubmit}>
         <input placeholder="Username" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} required />
         <input type="password" placeholder="Password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
         <button type="submit" disabled={saving}>{saving ? 'Signing In...' : 'Sign In'}</button>
       </form>
       {error ? <p className="error">{error}</p> : null}
+      {isDemoMode() ? <p className="auth-note">Demo login: demo_admin / demo12345</p> : null}
     </section>
   )
 }

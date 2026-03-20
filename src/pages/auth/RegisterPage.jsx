@@ -32,6 +32,7 @@ function RegisterPage() {
   return (
     <section className="auth-card">
       <h1 className="auth-title"><UserPlus size={19} /> Register</h1>
+      <p className="auth-subtitle">Create an account with your role to access module-specific workflows.</p>
       <form onSubmit={onSubmit}>
         <input placeholder="Full name" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required />
         <input placeholder="Username" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} required />
