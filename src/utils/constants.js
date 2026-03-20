@@ -1,0 +1,16 @@
+export const ROLES = {
+  ADMIN: 'ADMIN',
+  FARMER: 'FARMER',
+  BUYER: 'BUYER',
+  DISPATCHER: 'DISPATCHER',
+}
+
+export const ORDER_STATUSES = [
+  'PENDING',
+  'CONFIRMED',
+  'PACKED',
+  'ASSIGNED',
+  'IN_TRANSIT',
+  'DELIVERED',
+  'CANCELLED',
+]

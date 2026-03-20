@@ -1,0 +1,144 @@
+import { useEffect, useState } from 'react'
+import { assignShipment, getPendingShipments, getShipments, getTrips, updateShipmentStatus } from '../../api/logisticsApi'
+import { getApiErrorMessage } from '../../utils/apiError'
+
+const SHIPMENT_STATUS_OPTIONS = ['SCHEDULED', 'LOADED', 'IN_TRANSIT', 'DELIVERED', 'DELAYED', 'FAILED']
+
+function DispatchBoardPage() {
+  const [shipments, setShipments] = useState([])
+  const [pendingShipments, setPendingShipments] = useState([])
+  const [trips, setTrips] = useState([])
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+  const [assigningShipmentId, setAssigningShipmentId] = useState(null)
+  const [updatingShipmentId, setUpdatingShipmentId] = useState(null)
+
+  const loadData = () => {
+    Promise.all([getPendingShipments(), getShipments(), getTrips()])
+      .then(([pendingResponse, shipmentsResponse, tripsResponse]) => {
+        setPendingShipments(pendingResponse.data)
+        setShipments(shipmentsResponse.data)
+        setTrips(tripsResponse.data)
+      })
+      .catch((error) => setError(getApiErrorMessage(error, 'Failed to load dispatch data')))
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  useEffect(() => {
+    if (!message && !error) return
+    const timer = setTimeout(() => {
+      setMessage('')
+      setError('')
+    }, 3500)
+
+    return () => clearTimeout(timer)
+  }, [message, error])
+
+  const onAssign = async (shipmentId, tripId) => {
+    if (!tripId) return
+    setError('')
+    setMessage('')
+    setAssigningShipmentId(shipmentId)
+    const previousShipments = shipments
+    const previousPendingShipments = pendingShipments
+
+    setPendingShipments((prev) => prev.filter((item) => item.id !== shipmentId))
+    setShipments((prev) => prev.map((item) => {
+      if (item.id !== shipmentId) return item
+      return { ...item, trip: Number(tripId), status: 'SCHEDULED' }
+    }))
+
+    try {
+      await assignShipment({ shipment_id: shipmentId, trip_id: Number(tripId) })
+      setMessage(`Shipment #${shipmentId} assigned`)
+      loadData()
+    } catch (error) {
+      setShipments(previousShipments)
+      setPendingShipments(previousPendingShipments)
+      setError(getApiErrorMessage(error, 'Failed to assign shipment'))
+    } finally {
+      setAssigningShipmentId(null)
+    }
+  }
+
+  const onStatusChange = async (shipmentId, status) => {
+    setError('')
+    setMessage('')
+    setUpdatingShipmentId(shipmentId)
+    const previousShipments = shipments
+
+    setShipments((prev) => prev.map((item) => {
+      if (item.id !== shipmentId) return item
+      return { ...item, status }
+    }))
+
+    try {
+      await updateShipmentStatus(shipmentId, { status })
+      setMessage(`Shipment #${shipmentId} updated to ${status}`)
+      loadData()
+    } catch (error) {
+      setShipments(previousShipments)
+      setError(getApiErrorMessage(error, 'Failed to update shipment status'))
+    } finally {
+      setUpdatingShipmentId(null)
+    }
+  }
+
+  return (
+    <section className="panel">
+      <h2>Dispatch Board</h2>
+
+      {message ? <p>{message}</p> : null}
+      {error ? <p className="error">{error}</p> : null}
+
+      <h3>Pending Assignment</h3>
+      <ul className="list">
+        {pendingShipments.map((shipment) => (
+          <li key={shipment.id} className={`list-row ${assigningShipmentId === shipment.id ? 'pending-row' : ''}`}>
+            <span>
+              Shipment #{shipment.id} for order #{shipment.order}
+              {assigningShipmentId === shipment.id ? <em className="sync-text"> Syncing...</em> : null}
+            </span>
+            <select
+              defaultValue=""
+              onChange={(event) => onAssign(shipment.id, event.target.value)}
+              disabled={assigningShipmentId === shipment.id}
+            >
+              <option value="" disabled>Select trip</option>
+              {trips.map((trip) => (
+                <option key={trip.id} value={trip.id}>Trip #{trip.id} ({trip.status})</option>
+              ))}
+            </select>
+          </li>
+        ))}
+      </ul>
+
+      <h3>All Shipments</h3>
+      <ul className="list">
+        {shipments.map((shipment) => (
+          <li key={shipment.id} className={`list-row ${updatingShipmentId === shipment.id ? 'pending-row' : ''}`}>
+            <span>
+              Shipment #{shipment.id} order #{shipment.order} status {shipment.status}
+              {updatingShipmentId === shipment.id ? <em className="sync-text"> Syncing...</em> : null}
+            </span>
+            <select
+              defaultValue=""
+              onChange={(event) => onStatusChange(shipment.id, event.target.value)}
+              disabled={updatingShipmentId === shipment.id}
+            >
+              <option value="" disabled>Update status</option>
+              {SHIPMENT_STATUS_OPTIONS.map((status) => (
+                <option key={status} value={status}>{status}</option>
+              ))}
+            </select>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+export default DispatchBoardPage

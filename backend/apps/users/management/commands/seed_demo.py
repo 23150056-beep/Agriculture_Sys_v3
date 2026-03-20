@@ -1,0 +1,337 @@
+import random
+from datetime import timedelta
+from decimal import Decimal
+
+from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand
+from django.db import transaction
+from django.db.utils import OperationalError
+from django.utils import timezone
+
+from apps.catalog.models import Category, Product
+from apps.demand_board.models import DemandOffer, DemandPost
+from apps.listings.models import Listing
+from apps.locations.models import Location
+from apps.logistics.models import Driver, Shipment, Trip, Vehicle
+from apps.orders.models import Order, OrderStatusLog
+
+User = get_user_model()
+
+
+class Command(BaseCommand):
+    help = "Seed demo data for the agriculture distribution prototype"
+
+    def add_arguments(self, parser):
+        parser.add_argument("--password", type=str, default="demo12345")
+        parser.add_argument("--reset", action="store_true")
+
+    @transaction.atomic
+    def handle(self, *args, **options):
+        password = options["password"]
+        reset = options["reset"]
+
+        random.seed(42)
+
+        demo_usernames = [
+            "demo_admin",
+            "demo_farmer_1",
+            "demo_farmer_2",
+            "demo_buyer_1",
+            "demo_buyer_2",
+            "demo_dispatcher",
+        ]
+
+        if reset:
+            self.stdout.write("Resetting existing demo data...")
+            try:
+                DemandOffer.objects.filter(
+                    demand_post__buyer__username__in=demo_usernames
+                ).delete()
+                DemandOffer.objects.filter(farmer__username__in=demo_usernames).delete()
+                DemandPost.objects.filter(buyer__username__in=demo_usernames).delete()
+                Shipment.objects.filter(order__buyer__username__in=demo_usernames).delete()
+                OrderStatusLog.objects.filter(order__buyer__username__in=demo_usernames).delete()
+                Order.objects.filter(buyer__username__in=demo_usernames).delete()
+                Listing.objects.filter(farmer__username__in=demo_usernames).delete()
+                Trip.objects.filter(dispatcher__username="demo_dispatcher").delete()
+                Driver.objects.filter(license_no__startswith="DEMO-").delete()
+                Vehicle.objects.filter(plate_number__startswith="DEMO-").delete()
+                Product.objects.filter(name__startswith="DEMO ").delete()
+                Category.objects.filter(name__startswith="Demo ").delete()
+                Location.objects.filter(province__startswith="DemoProvince").delete()
+                User.objects.filter(username__in=demo_usernames).delete()
+            except OperationalError:
+                self.stdout.write("Demo tables not present yet, skipping reset cleanup.")
+
+        users = {
+            "admin": self._upsert_user(
+                "demo_admin",
+                "ADMIN",
+                "Demo Admin",
+                "demo_admin@example.com",
+                "09170000001",
+                password,
+                is_staff=True,
+                is_superuser=True,
+            ),
+            "farmer_1": self._upsert_user(
+                "demo_farmer_1",
+                "FARMER",
+                "Demo Farmer One",
+                "demo_farmer_1@example.com",
+                "09170000002",
+                password,
+            ),
+            "farmer_2": self._upsert_user(
+                "demo_farmer_2",
+                "FARMER",
+                "Demo Farmer Two",
+                "demo_farmer_2@example.com",
+                "09170000003",
+                password,
+            ),
+            "buyer_1": self._upsert_user(
+                "demo_buyer_1",
+                "BUYER",
+                "Demo Buyer One",
+                "demo_buyer_1@example.com",
+                "09170000004",
+                password,
+            ),
+            "buyer_2": self._upsert_user(
+                "demo_buyer_2",
+                "BUYER",
+                "Demo Buyer Two",
+                "demo_buyer_2@example.com",
+                "09170000005",
+                password,
+            ),
+            "dispatcher": self._upsert_user(
+                "demo_dispatcher",
+                "DISPATCHER",
+                "Demo Dispatcher",
+                "demo_dispatcher@example.com",
+                "09170000006",
+                password,
+            ),
+        }
+
+        categories = {
+            "Vegetables": self._upsert_category("Demo Vegetables"),
+            "Fruits": self._upsert_category("Demo Fruits"),
+            "Grains": self._upsert_category("Demo Grains"),
+        }
+
+        product_specs = [
+            ("Tomato", "Vegetables", "kg"),
+            ("Onion", "Vegetables", "kg"),
+            ("Eggplant", "Vegetables", "kg"),
+            ("Cabbage", "Vegetables", "kg"),
+            ("Banana", "Fruits", "kg"),
+            ("Mango", "Fruits", "crate"),
+            ("Pineapple", "Fruits", "crate"),
+            ("Rice", "Grains", "sack"),
+            ("Corn", "Grains", "sack"),
+            ("Mongo", "Grains", "kg"),
+        ]
+        products = []
+        for name, category_name, unit in product_specs:
+            product, _ = Product.objects.update_or_create(
+                name=f"DEMO {name}",
+                defaults={"category": categories[category_name], "default_unit": unit},
+            )
+            products.append(product)
+
+        location_specs = [
+            ("DemoProvince A", "City Alpha", "Barangay Uno"),
+            ("DemoProvince A", "City Alpha", "Barangay Dos"),
+            ("DemoProvince A", "City Beta", "Barangay Tres"),
+            ("DemoProvince B", "City Delta", "Barangay Apat"),
+            ("DemoProvince B", "City Echo", "Barangay Lima"),
+            ("DemoProvince C", "City Foxtrot", "Barangay Anim"),
+        ]
+        locations = []
+        for province, city, barangay in location_specs:
+            location, _ = Location.objects.update_or_create(
+                province=province,
+                city_municipality=city,
+                barangay=barangay,
+                defaults={"postal_code": "1000"},
+            )
+            locations.append(location)
+
+        listings = []
+        today = timezone.localdate()
+        for index in range(20):
+            farmer = users["farmer_1"] if index % 2 == 0 else users["farmer_2"]
+            product = products[index % len(products)]
+            location = locations[index % len(locations)]
+            quantity = Decimal(str(90 + index * 3))
+            unit_price = Decimal(str(18 + (index % 7) * 2))
+            listing, _ = Listing.objects.update_or_create(
+                farmer=farmer,
+                product=product,
+                location=location,
+                unit=product.default_unit,
+                quality_grade=["A", "B", "C"][index % 3],
+                available_until=today + timedelta(days=2 + (index % 5)),
+                defaults={
+                    "quantity_available": quantity,
+                    "unit_price": unit_price,
+                    "harvest_date": today - timedelta(days=1 + (index % 4)),
+                    "urgent_sale": (index % 5 == 0),
+                    "status": "ACTIVE",
+                },
+            )
+            listings.append(listing)
+
+        buyers = [users["buyer_1"], users["buyer_2"]]
+        order_statuses = [
+            "PENDING",
+            "CONFIRMED",
+            "PACKED",
+            "ASSIGNED",
+            "IN_TRANSIT",
+            "DELIVERED",
+            "CANCELLED",
+            "CONFIRMED",
+        ]
+        orders = []
+        for index in range(8):
+            listing = listings[index]
+            buyer = buyers[index % len(buyers)]
+            quantity = Decimal("10") + Decimal(str(index))
+            total = quantity * listing.unit_price
+            order = Order.objects.create(
+                buyer=buyer,
+                listing=listing,
+                quantity=quantity,
+                unit_price_snapshot=listing.unit_price,
+                total_price=total,
+                status=order_statuses[index],
+                delivery_location=locations[(index + 1) % len(locations)],
+                expected_delivery_date=today + timedelta(days=3 + index),
+            )
+            orders.append(order)
+            self._create_status_timeline(order, buyer)
+
+        vehicles = []
+        for index, capacity in enumerate([1200, 1500, 1800], start=1):
+            vehicle, _ = Vehicle.objects.update_or_create(
+                plate_number=f"DEMO-TRK-{index:03d}",
+                defaults={"vehicle_type": "Truck", "capacity_kg": Decimal(str(capacity)), "is_active": True},
+            )
+            vehicles.append(vehicle)
+
+        drivers = []
+        for index in range(1, 4):
+            driver, _ = Driver.objects.update_or_create(
+                license_no=f"DEMO-LIC-{index:03d}",
+                defaults={
+                    "name": f"Demo Driver {index}",
+                    "phone": f"0917900000{index}",
+                    "is_active": True,
+                },
+            )
+            drivers.append(driver)
+
+        trips = []
+        for index in range(3):
+            trip = Trip.objects.create(
+                dispatcher=users["dispatcher"],
+                vehicle=vehicles[index],
+                driver=drivers[index],
+                scheduled_date=today + timedelta(days=1 + index),
+                status="SCHEDULED",
+            )
+            trips.append(trip)
+
+        for index, order in enumerate(orders):
+            shipment_status = "PENDING_ASSIGNMENT"
+            trip = None
+            if order.status in ["ASSIGNED", "IN_TRANSIT", "DELIVERED"]:
+                shipment_status = {
+                    "ASSIGNED": "SCHEDULED",
+                    "IN_TRANSIT": "IN_TRANSIT",
+                    "DELIVERED": "DELIVERED",
+                }[order.status]
+                trip = trips[index % len(trips)]
+
+            Shipment.objects.create(
+                order=order,
+                trip=trip,
+                eta=timezone.now() + timedelta(days=2),
+                status=shipment_status,
+            )
+
+        demand_posts = []
+        for index in range(5):
+            demand_post = DemandPost.objects.create(
+                buyer=buyers[index % len(buyers)],
+                product=products[(index + 2) % len(products)],
+                target_quantity=Decimal(str(50 + index * 10)),
+                budget_min=Decimal("1000.00") + Decimal(str(index * 300)),
+                budget_max=Decimal("1800.00") + Decimal(str(index * 350)),
+                required_by_date=today + timedelta(days=7 + index),
+                location=locations[index % len(locations)],
+                status="OPEN",
+            )
+            demand_posts.append(demand_post)
+
+        farmers = [users["farmer_1"], users["farmer_2"]]
+        for index, post in enumerate(demand_posts):
+            DemandOffer.objects.create(
+                demand_post=post,
+                farmer=farmers[index % len(farmers)],
+                offered_quantity=Decimal(str(20 + index * 4)),
+                offered_price=Decimal("1200.00") + Decimal(str(index * 200)),
+                note="Demo offer",
+                status="PENDING",
+            )
+
+        self.stdout.write(self.style.SUCCESS("Demo seed complete."))
+        self.stdout.write("Accounts password: {}".format(password))
+        self.stdout.write("Created: 6 users, 10 products, 20 listings, 8 orders, 3 trips, 5 demand posts")
+
+    def _upsert_user(self, username, role, full_name, email, phone, password, is_staff=False, is_superuser=False):
+        user, _ = User.objects.update_or_create(
+            username=username,
+            defaults={
+                "role": role,
+                "full_name": full_name,
+                "email": email,
+                "phone": phone,
+                "is_active": True,
+                "is_staff": is_staff,
+                "is_superuser": is_superuser,
+            },
+        )
+        user.set_password(password)
+        user.save()
+        return user
+
+    def _upsert_category(self, name):
+        category, _ = Category.objects.get_or_create(name=name)
+        return category
+
+    def _create_status_timeline(self, order, actor):
+        path = {
+            "PENDING": ["PENDING"],
+            "CONFIRMED": ["PENDING", "CONFIRMED"],
+            "PACKED": ["PENDING", "CONFIRMED", "PACKED"],
+            "ASSIGNED": ["PENDING", "CONFIRMED", "PACKED", "ASSIGNED"],
+            "IN_TRANSIT": ["PENDING", "CONFIRMED", "PACKED", "ASSIGNED", "IN_TRANSIT"],
+            "DELIVERED": ["PENDING", "CONFIRMED", "PACKED", "ASSIGNED", "IN_TRANSIT", "DELIVERED"],
+            "CANCELLED": ["PENDING", "CANCELLED"],
+        }.get(order.status, [order.status])
+
+        previous = ""
+        for status in path:
+            OrderStatusLog.objects.create(
+                order=order,
+                from_status=previous,
+                to_status=status,
+                changed_by=actor,
+                note="Seeded timeline",
+            )
+            previous = status
