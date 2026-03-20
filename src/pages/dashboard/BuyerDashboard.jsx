@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ShoppingCart } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import ActivityPanel from '../../components/common/ActivityPanel'
 import AutoRefreshBadge from '../../components/common/AutoRefreshBadge'
 import DrilldownChartCard from '../../components/charts/DrilldownChartCard'
 import { getSummary } from '../../api/dashboardApi'
@@ -11,12 +12,14 @@ import KpiCard from '../../components/common/KpiCard'
 import PageHeader from '../../components/common/PageHeader'
 import SkeletonLoader from '../../components/common/SkeletonLoader'
 import heroImage from '../../assets/hero.png'
+import useActivityLog from '../../hooks/useActivityLog'
 
 function BuyerDashboard() {
   const navigate = useNavigate()
   const [totals, setTotals] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const { entries: activityEntries } = useActivityLog()
 
   const statuses = ['PENDING', 'CONFIRMED', 'IN_TRANSIT', 'DELIVERED']
   const chartPoints = useMemo(() => {
@@ -74,6 +77,7 @@ function BuyerDashboard() {
             labels={statuses}
             onPointSelect={(_, label) => navigate(`/orders/buyer?status=${encodeURIComponent(label)}`)}
           />
+          <ActivityPanel items={activityEntries} title="Buyer Activity" />
         </>
       ) : null}
       {!isLoading && !error && !totals ? <EmptyState title="No buyer metrics yet" description="Metrics appear once data is available." /> : null}

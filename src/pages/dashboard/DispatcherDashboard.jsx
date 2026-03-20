@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Truck } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import ActivityPanel from '../../components/common/ActivityPanel'
 import AutoRefreshBadge from '../../components/common/AutoRefreshBadge'
 import DrilldownChartCard from '../../components/charts/DrilldownChartCard'
 import { getDispatcherOverview, getSummary } from '../../api/dashboardApi'
@@ -11,6 +12,7 @@ import KpiCard from '../../components/common/KpiCard'
 import PageHeader from '../../components/common/PageHeader'
 import SkeletonLoader from '../../components/common/SkeletonLoader'
 import heroImage from '../../assets/hero.png'
+import useActivityLog from '../../hooks/useActivityLog'
 
 function DispatcherDashboard() {
   const navigate = useNavigate()
@@ -18,6 +20,7 @@ function DispatcherDashboard() {
   const [overview, setOverview] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const { entries: activityEntries } = useActivityLog()
 
   const statuses = ['SCHEDULED', 'LOADED', 'IN_TRANSIT', 'DELIVERED']
   const chartPoints = useMemo(() => {
@@ -77,6 +80,7 @@ function DispatcherDashboard() {
             labels={statuses}
             onPointSelect={(_, label) => navigate(`/logistics/shipment-tracking?status=${encodeURIComponent(label)}`)}
           />
+          <ActivityPanel items={activityEntries} title="Dispatch Activity" />
         </>
       ) : null}
       {!loading && !error && !overview && !totals ? <EmptyState title="No dispatcher metrics" description="Metrics appear once trip and shipment records exist." /> : null}

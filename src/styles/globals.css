@@ -717,6 +717,14 @@ main {
   font-size: 0.8rem;
 }
 
+.activity-panel {
+  margin-top: 0.8rem;
+}
+
+.activity-filters {
+  margin-bottom: 0.5rem;
+}
+
 .ops-pulse-strip {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));

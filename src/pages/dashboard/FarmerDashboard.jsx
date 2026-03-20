@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Tractor } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import ActivityPanel from '../../components/common/ActivityPanel'
 import AutoRefreshBadge from '../../components/common/AutoRefreshBadge'
 import DrilldownChartCard from '../../components/charts/DrilldownChartCard'
 import { getFarmerOverview, getSummary } from '../../api/dashboardApi'
@@ -11,6 +12,7 @@ import KpiCard from '../../components/common/KpiCard'
 import PageHeader from '../../components/common/PageHeader'
 import SkeletonLoader from '../../components/common/SkeletonLoader'
 import heroImage from '../../assets/hero.png'
+import useActivityLog from '../../hooks/useActivityLog'
 
 function FarmerDashboard() {
   const navigate = useNavigate()
@@ -18,6 +20,7 @@ function FarmerDashboard() {
   const [overview, setOverview] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const { entries: activityEntries } = useActivityLog()
 
   const statuses = ['CONFIRMED', 'PACKED', 'IN_TRANSIT', 'DELIVERED']
   const chartPoints = useMemo(() => {
@@ -77,6 +80,7 @@ function FarmerDashboard() {
             labels={statuses}
             onPointSelect={(_, label) => navigate(`/orders/farmer?status=${encodeURIComponent(label)}`)}
           />
+          <ActivityPanel items={activityEntries} title="Farmer Activity" />
         </>
       ) : null}
       {!loading && !error && !overview && !totals ? <EmptyState title="No farmer metrics" description="Metrics appear once listing and order data is present." /> : null}

@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { getSummary } from '../../api/dashboardApi'
 import AutoRefreshBadge from '../../components/common/AutoRefreshBadge'
 import DrilldownChartCard from '../../components/charts/DrilldownChartCard'
+import ActivityPanel from '../../components/common/ActivityPanel'
 import EmptyState from '../../components/common/EmptyState'
 import HeroBanner from '../../components/common/HeroBanner'
 import LiveActivityFeed from '../../components/common/LiveActivityFeed'
@@ -13,6 +14,7 @@ import PageHeader from '../../components/common/PageHeader'
 import SkeletonLoader from '../../components/common/SkeletonLoader'
 import TimeRangeToggle from '../../components/common/TimeRangeToggle'
 import heroImage from '../../assets/hero.png'
+import useActivityLog from '../../hooks/useActivityLog'
 
 function AdminDashboard() {
   const navigate = useNavigate()
@@ -22,6 +24,7 @@ function AdminDashboard() {
   const [range, setRange] = useState('7d')
   const [activity, setActivity] = useState([])
   const [refreshActive, setRefreshActive] = useState(true)
+  const { entries: activityEntries } = useActivityLog()
 
   const loadSummary = () => {
     getSummary()
@@ -173,6 +176,7 @@ function AdminDashboard() {
             </div>
             <LiveActivityFeed items={activity} />
           </div>
+          <ActivityPanel items={activityEntries} title="Shared Activity Stream" />
         </>
       ) : null}
       {!isLoading && !error && !totals ? <EmptyState title="No dashboard totals yet" description="Data will appear when records are available." /> : null}
