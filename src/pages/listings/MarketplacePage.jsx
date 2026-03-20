@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Store } from 'lucide-react'
 import DataTable from '../../components/common/DataTable'
+import DetailDrawer from '../../components/common/DetailDrawer'
 import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
 import ImageCard from '../../components/common/ImageCard'
@@ -31,6 +32,8 @@ function MarketplacePage() {
     if (chipFilter === 'URGENT') return matchesText && item.urgent_sale
     return matchesText && !item.urgent_sale
   })
+
+  const activeListing = filteredListings.find((entry) => entry.id === expandedId)
 
   return (
     <section className="panel">
@@ -80,28 +83,12 @@ function MarketplacePage() {
               label: 'Details',
               render: (item) => (
                 <button type="button" onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}>
-                  {expandedId === item.id ? 'Hide' : 'Expand'}
+                  {expandedId === item.id ? 'Close' : 'Open'}
                 </button>
               ),
             },
           ]}
         />
-        {expandedId ? (
-          <article className="card listing-expanded">
-            {(() => {
-              const active = filteredListings.find((entry) => entry.id === expandedId)
-              if (!active) return null
-              return (
-                <>
-                  <h3>{active.product_name || `Product #${active.product}`}</h3>
-                  <p>Quality: {active.quality_grade || 'N/A'}</p>
-                  <p>Available until: {active.available_until || 'N/A'}</p>
-                  <p>Farmer: {active.farmer_name || 'N/A'}</p>
-                </>
-              )
-            })()}
-          </article>
-        ) : null}
       </div>
       <div className="mobile-card-list">
         {filteredListings.map((item) => (
@@ -117,6 +104,23 @@ function MarketplacePage() {
           </ImageCard>
         ))}
       </div>
+      <DetailDrawer open={Boolean(activeListing)} title={activeListing ? (activeListing.product_name || `Product #${activeListing.product}`) : 'Listing Details'} onClose={() => setExpandedId(null)}>
+        {activeListing ? (
+          <div className="drawer-details">
+            <img
+              className="drawer-thumb"
+              src={activeListing.images?.[0]?.image || heroImage}
+              alt={activeListing.product_name || `Product ${activeListing.product}`}
+              onError={(event) => { event.currentTarget.src = heroImage }}
+            />
+            <p><strong>Quantity:</strong> {activeListing.quantity_available} {activeListing.unit}</p>
+            <p><strong>Price:</strong> {formatCurrency(activeListing.unit_price)}</p>
+            <p><strong>Quality:</strong> {activeListing.quality_grade || 'N/A'}</p>
+            <p><strong>Available until:</strong> {activeListing.available_until || 'N/A'}</p>
+            <p><strong>Farmer:</strong> {activeListing.farmer_name || 'N/A'}</p>
+          </div>
+        ) : null}
+      </DetailDrawer>
     </section>
   )
 }

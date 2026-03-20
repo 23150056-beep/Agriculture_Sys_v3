@@ -725,6 +725,16 @@ main {
   margin: 0.55rem 0;
 }
 
+.toast-stack {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 60;
+  display: grid;
+  gap: 0.5rem;
+  max-width: 340px;
+}
+
 .empty-title {
   margin: 0;
   font-family: 'Sora', sans-serif;
@@ -749,11 +759,31 @@ main {
 }
 
 .toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
   border: 1px solid #a5caab;
   background: #eef8ee;
   color: #285d36;
   border-radius: var(--radius-sm);
   padding: 0.52rem 0.66rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.toast-close {
+  background: transparent;
+  color: inherit;
+  border: 1px solid currentColor;
+  padding: 0.15rem 0.45rem;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.toast-close:hover {
+  transform: none;
+  filter: none;
+  box-shadow: none;
 }
 
 .toast-error {
@@ -858,6 +888,27 @@ main {
   animation: shimmer 1.25s linear infinite;
 }
 
+.skeleton-wrap.card,
+.skeleton-wrap.table {
+  gap: 0.62rem;
+}
+
+.skeleton-card {
+  height: 96px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, #e2eddd, #f3f8ef, #e2eddd);
+  background-size: 220% 100%;
+  animation: shimmer 1.25s linear infinite;
+}
+
+.skeleton-table-row {
+  height: 42px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #e2eddd, #f3f8ef, #e2eddd);
+  background-size: 220% 100%;
+  animation: shimmer 1.25s linear infinite;
+}
+
 .pending-row {
   border-color: #e7c991;
   background: #fff8e8;
@@ -892,6 +943,18 @@ main {
   justify-content: space-between;
   gap: 0.7rem;
   align-items: center;
+}
+
+.drawer-details {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.drawer-thumb {
+  width: 100%;
+  height: 160px;
+  border-radius: 14px;
+  object-fit: cover;
 }
 
 .loading {
