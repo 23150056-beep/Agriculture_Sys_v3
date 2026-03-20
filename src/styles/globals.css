@@ -725,6 +725,13 @@ main {
   margin-bottom: 0.5rem;
 }
 
+.activity-actions {
+  margin-top: 0.45rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
 .ops-pulse-strip {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));

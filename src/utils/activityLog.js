@@ -8,6 +8,7 @@ const asDisplayEntry = (entry) => ({
   title: entry.message || entry.title || 'Activity event',
   module: entry.module || 'ui',
   action: entry.action || 'event',
+  metadata: entry.metadata || {},
 })
 
 const readLog = () => {
