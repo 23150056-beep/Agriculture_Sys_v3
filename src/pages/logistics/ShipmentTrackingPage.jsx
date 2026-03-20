@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { MapPinned } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { createProofOfDelivery, getShipments, updateShipmentStatus } from '../../api/logisticsApi'
+import ExportCenter from '../../components/dynamic/ExportCenter'
 import ErrorState from '../../components/common/ErrorState'
 import FilterBar from '../../components/common/FilterBar'
 import EmptyState from '../../components/common/EmptyState'
@@ -128,6 +129,24 @@ function ShipmentTrackingPage() {
             </button>
           ))}
         </div>
+        <ExportCenter
+          title="Export CSV"
+          filename="shipments-tracking.csv"
+          columns={[
+            { key: 'id', label: 'Shipment ID' },
+            { key: 'order', label: 'Order ID' },
+            { key: 'status', label: 'Status' },
+            { key: 'trip', label: 'Trip ID' },
+            { key: 'eta', label: 'ETA' },
+          ]}
+          rows={filteredShipments.map((shipment) => ({
+            id: shipment.id,
+            order: shipment.order,
+            status: shipment.status,
+            trip: shipment.trip || 'Unassigned',
+            eta: shipment.eta || 'N/A',
+          }))}
+        />
       </FilterBar>
 
       <ul className="list">

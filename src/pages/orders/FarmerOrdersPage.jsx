@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { ClipboardCheck } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import DynamicAutoRefreshBadge from '../../components/dynamic/AutoRefreshBadge'
+import ExportCenter from '../../components/dynamic/ExportCenter'
 import SavedViewPicker from '../../components/dynamic/SavedViewPicker'
 import DataTable from '../../components/common/DataTable'
 import EmptyState from '../../components/common/EmptyState'
@@ -204,6 +205,22 @@ function FarmerOrdersPage() {
           onSelect={setSelectedViewId}
           onSave={(name) => saveView(name, { query, statusFilter })}
           onDelete={deleteView}
+        />
+        <ExportCenter
+          title="Export CSV"
+          filename="farmer-orders.csv"
+          columns={[
+            { key: 'id', label: 'Order ID' },
+            { key: 'product', label: 'Product' },
+            { key: 'status', label: 'Status' },
+            { key: 'expected_delivery_date', label: 'Expected Delivery' },
+          ]}
+          rows={filteredOrders.map((order) => ({
+            id: order.id,
+            product: getOrderProductName(order),
+            status: order.status,
+            expected_delivery_date: order.expected_delivery_date || 'N/A',
+          }))}
         />
         <div className="bulk-actions">
           <span>{selectedOrderIds.length} selected</span>
