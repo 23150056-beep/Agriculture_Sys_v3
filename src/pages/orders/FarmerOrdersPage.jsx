@@ -27,6 +27,9 @@ function FarmerOrdersPage() {
   const [message, setMessage] = useState('')
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
+  const [selectedOrderIds, setSelectedOrderIds] = useState([])
+  const [bulkStatus, setBulkStatus] = useState('')
+  const [bulkUpdating, setBulkUpdating] = useState(false)
   const [loading, setLoading] = useState(true)
 
   const {
@@ -49,6 +52,7 @@ function FarmerOrdersPage() {
   })
 
   const statuses = ['ALL', ...new Set(orders.map((order) => order.status))]
+  const allFilteredSelected = filteredOrders.length > 0 && filteredOrders.every((order) => selectedOrderIds.includes(order.id))
 
   const loadOrders = useCallback(async () => {
     try {
@@ -92,6 +96,61 @@ function FarmerOrdersPage() {
     setQuery(selectedView.filters.query || '')
     setStatusFilter(selectedView.filters.statusFilter || 'ALL')
   }, [selectedView])
+
+  useEffect(() => {
+    setSelectedOrderIds((prev) => prev.filter((id) => orders.some((order) => order.id === id)))
+  }, [orders])
+
+  const toggleSelectOrder = (orderId, checked) => {
+    setSelectedOrderIds((prev) => {
+      if (checked) return [...new Set([...prev, orderId])]
+      return prev.filter((id) => id !== orderId)
+    })
+  }
+
+  const toggleSelectAllFiltered = (checked) => {
+    const filteredIds = filteredOrders.map((order) => order.id)
+    setSelectedOrderIds((prev) => {
+      if (checked) return [...new Set([...prev, ...filteredIds])]
+      return prev.filter((id) => !filteredIds.includes(id))
+    })
+  }
+
+  const onBulkUpdate = async () => {
+    if (!bulkStatus) {
+      setError('Select a target status for bulk update.')
+      return
+    }
+    if (!selectedOrderIds.length) {
+      setError('Select at least one order for bulk update.')
+      return
+    }
+
+    setError('')
+    setMessage('')
+    setBulkUpdating(true)
+
+    const results = await Promise.allSettled(
+      selectedOrderIds.map((orderId) => updateOrderStatus(orderId, { status: bulkStatus, note: 'Bulk updated by farmer module' })),
+    )
+
+    const successCount = results.filter((result) => result.status === 'fulfilled').length
+    const failedCount = results.length - successCount
+
+    if (successCount > 0) {
+      setMessage(`${successCount} order${successCount > 1 ? 's' : ''} updated to ${bulkStatus}`)
+    }
+    if (failedCount > 0) {
+      setError(`${failedCount} update${failedCount > 1 ? 's' : ''} failed due to transition rules or server validation.`)
+    }
+
+    await refreshNow()
+    setBulkUpdating(false)
+    if (failedCount === 0) {
+      setSelectedOrderIds([])
+      setBulkStatus('')
+    }
+  }
 
   const onStatusChange = async (orderId, status) => {
     setError('')
@@ -146,6 +205,19 @@ function FarmerOrdersPage() {
           onSave={(name) => saveView(name, { query, statusFilter })}
           onDelete={deleteView}
         />
+        <div className="bulk-actions">
+          <span>{selectedOrderIds.length} selected</span>
+          <select value={bulkStatus} onChange={(event) => setBulkStatus(event.target.value)}>
+            <option value="">Bulk status</option>
+            {STATUS_OPTIONS.map((status) => (
+              <option key={status} value={status}>{status}</option>
+            ))}
+          </select>
+          <button type="button" onClick={onBulkUpdate} disabled={bulkUpdating || !selectedOrderIds.length || !bulkStatus}>
+            {bulkUpdating ? 'Applying...' : 'Apply to Selected'}
+          </button>
+          <button type="button" className="chip" onClick={() => setSelectedOrderIds([])} disabled={bulkUpdating || !selectedOrderIds.length}>Clear</button>
+        </div>
       </FilterBar>
       {loading ? <SkeletonLoader lines={4} variant="table" /> : null}
       <div className="desktop-list">
@@ -154,6 +226,25 @@ function FarmerOrdersPage() {
           rows={filteredOrders}
           emptyFallback={<EmptyState title="No farmer orders" description="Orders tied to your listings will appear here." />}
           columns={[
+            {
+              key: 'select',
+              label: (
+                <input
+                  type="checkbox"
+                  aria-label="Select all filtered orders"
+                  checked={allFilteredSelected}
+                  onChange={(event) => toggleSelectAllFiltered(event.target.checked)}
+                />
+              ),
+              render: (order) => (
+                <input
+                  type="checkbox"
+                  aria-label={`Select order ${order.id}`}
+                  checked={selectedOrderIds.includes(order.id)}
+                  onChange={(event) => toggleSelectOrder(order.id, event.target.checked)}
+                />
+              ),
+            },
             { key: 'id', label: 'Order', render: (order) => `#${order.id}` },
             {
               key: 'thumbnail',
@@ -193,6 +284,14 @@ function FarmerOrdersPage() {
             fallback={getProduceFallbackImage(getOrderProductName(order), heroImage)}
             title={`Order #${order.id} - ${getOrderProductName(order)}`}
           >
+            <label className="row-check">
+              <input
+                type="checkbox"
+                checked={selectedOrderIds.includes(order.id)}
+                onChange={(event) => toggleSelectOrder(order.id, event.target.checked)}
+              />
+              Select for bulk update
+            </label>
             <p><strong>Status:</strong> {order.status}</p>
             <select defaultValue="" onChange={(event) => onStatusChange(order.id, event.target.value)}>
               <option value="" disabled>Update status</option>

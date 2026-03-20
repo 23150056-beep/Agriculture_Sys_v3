@@ -99,6 +99,14 @@ input::placeholder {
   color: #7f9280;
 }
 
+input[type='checkbox'] {
+  width: auto;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  accent-color: var(--brand);
+}
+
 .layout {
   min-height: 100vh;
 }
@@ -321,6 +329,27 @@ input::placeholder {
 
 .saved-views button {
   padding: 0.55rem 0.8rem;
+}
+
+.bulk-actions {
+  display: grid;
+  grid-template-columns: auto minmax(120px, 180px) auto auto;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.bulk-actions span {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.row-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
 }
 
 .density-toggle {
@@ -1265,6 +1294,11 @@ main {
 
   .saved-views {
     grid-template-columns: 1fr;
+  }
+
+  .bulk-actions {
+    grid-template-columns: 1fr;
+    align-items: stretch;
   }
 
   .desktop-list {
