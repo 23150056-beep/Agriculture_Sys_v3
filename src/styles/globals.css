@@ -161,6 +161,150 @@ input::placeholder {
   font-size: 0.9rem;
 }
 
+.icon-button,
+.ghost-button,
+.shortcut-pill,
+.palette-item,
+.mini-action {
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--text-muted);
+  padding: 0.34rem 0.62rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.shortcut-pill {
+  background: #edf5e8;
+  border-color: #bfd1b0;
+}
+
+.notification-wrap {
+  position: relative;
+}
+
+.notification-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.4rem);
+  width: 280px;
+  z-index: 30;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: #fff;
+  box-shadow: var(--shadow-soft);
+  padding: 0.5rem;
+}
+
+.notification-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+
+.notification-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.32rem;
+}
+
+.notification-panel li {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.46rem 0.5rem;
+  background: #f7fbf4;
+}
+
+.notification-panel li.read {
+  opacity: 0.6;
+}
+
+.notification-panel p,
+.notification-panel small {
+  margin: 0;
+}
+
+.badge-dot {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.palette-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: start center;
+  padding-top: 14vh;
+  background: rgba(21, 32, 21, 0.26);
+  backdrop-filter: blur(2px);
+}
+
+.palette-panel {
+  width: min(680px, 92vw);
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: #fff;
+  box-shadow: var(--shadow-strong);
+  padding: 0.65rem;
+}
+
+.palette-search {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.1rem 0.45rem;
+}
+
+.palette-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.palette-item {
+  width: 100%;
+  justify-content: space-between;
+  background: #f7fbf4;
+}
+
+.palette-empty {
+  padding: 0.5rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.saved-views {
+  display: grid;
+  grid-template-columns: 170px 1fr auto auto;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.saved-views button {
+  padding: 0.55rem 0.8rem;
+}
+
+.auto-refresh-badge .mini-action {
+  margin-left: 0.35rem;
+}
+
 .shell {
   display: grid;
   grid-template-columns: 250px minmax(0, 1fr);
@@ -1007,6 +1151,16 @@ main {
     width: 100%;
     overflow-x: auto;
     padding-bottom: 0.2rem;
+  }
+
+  .user-meta {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .saved-views {
+    grid-template-columns: 1fr;
   }
 
   .desktop-list {

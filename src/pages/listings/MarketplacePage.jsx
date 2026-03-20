@@ -1,15 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Store } from 'lucide-react'
 import DataTable from '../../components/common/DataTable'
 import DetailDrawer from '../../components/common/DetailDrawer'
 import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
 import ImageCard from '../../components/common/ImageCard'
+import SkeletonLoader from '../../components/common/SkeletonLoader'
+import DynamicAutoRefreshBadge from '../../components/dynamic/AutoRefreshBadge'
+import SavedViewPicker from '../../components/dynamic/SavedViewPicker'
 import { getListings } from '../../api/listingsApi'
 import PageHeader from '../../components/common/PageHeader'
 import heroImage from '../../assets/hero.png'
 import { formatCurrency } from '../../utils/formatCurrency'
 import { getProduceFallbackImage } from '../../utils/produceImage'
+import useAutoRefresh from '../../hooks/useAutoRefresh'
+import useSavedViews from '../../hooks/useSavedViews'
 
 function MarketplacePage() {
   const [listings, setListings] = useState([])
@@ -17,15 +22,46 @@ function MarketplacePage() {
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [expandedId, setExpandedId] = useState(null)
   const [chipFilter, setChipFilter] = useState('ALL')
+  const [loading, setLoading] = useState(true)
+
+  const {
+    views,
+    selectedView,
+    selectedViewId,
+    setSelectedViewId,
+    saveView,
+    deleteView,
+  } = useSavedViews('saved-views-marketplace')
+
+  const loadListings = useCallback(async () => {
+    try {
+      const { data } = await getListings()
+      setListings(data)
+    } catch {
+      setListings([])
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const { isActive, setIsActive, lastUpdated, refreshNow } = useAutoRefresh(loadListings, {
+    intervalMs: 45000,
+  })
 
   useEffect(() => {
-    getListings().then(({ data }) => setListings(data)).catch(() => setListings([]))
-  }, [])
+    refreshNow()
+  }, [refreshNow])
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedQuery(query), 220)
     return () => clearTimeout(timer)
   }, [query])
+
+  useEffect(() => {
+    if (!selectedView) return
+    setQuery(selectedView.filters.query || '')
+    setChipFilter(selectedView.filters.chipFilter || 'ALL')
+  }, [selectedView])
 
   const filteredListings = listings.filter((item) => {
     const matchesText = `${item.product_name || item.product}`.toLowerCase().includes(debouncedQuery.toLowerCase())
@@ -44,6 +80,13 @@ function MarketplacePage() {
         title="Marketplace Listings"
         subtitle="Browse available produce, pricing, and urgency signals."
       />
+      <DynamicAutoRefreshBadge
+        active={isActive}
+        seconds={45}
+        lastUpdated={lastUpdated}
+        onToggle={() => setIsActive((prev) => !prev)}
+        onRefresh={refreshNow}
+      />
       <FilterBar>
         <input
           placeholder="Search by product or status"
@@ -55,7 +98,15 @@ function MarketplacePage() {
           <button type="button" className={`chip ${chipFilter === 'URGENT' ? 'active' : ''}`} onClick={() => setChipFilter('URGENT')}>Urgent</button>
           <button type="button" className={`chip ${chipFilter === 'NORMAL' ? 'active' : ''}`} onClick={() => setChipFilter('NORMAL')}>Normal</button>
         </div>
+        <SavedViewPicker
+          views={views}
+          selectedViewId={selectedViewId}
+          onSelect={setSelectedViewId}
+          onSave={(name) => saveView(name, { query, chipFilter })}
+          onDelete={deleteView}
+        />
       </FilterBar>
+      {loading ? <SkeletonLoader lines={4} variant="table" /> : null}
       <div className="desktop-list">
         <DataTable
           rowKey="id"

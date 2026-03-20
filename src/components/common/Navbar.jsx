@@ -2,9 +2,17 @@ import { Link, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, PackageSearch, ShoppingBag, Truck, UserRound } from 'lucide-react'
 import { ROLES } from '../../utils/constants'
 import { clearStoredAuth } from '../../utils/demoAuth'
+import KeyboardShortcuts from '../dynamic/KeyboardShortcuts'
+import NotificationCenter from '../dynamic/NotificationCenter'
 
-function Navbar({ user }) {
+function Navbar({ user, onOpenPalette }) {
   const navigate = useNavigate()
+
+  const notifications = [
+    { id: 'notif-orders', title: 'Orders queue updated', timeLabel: 'Just now' },
+    { id: 'notif-logistics', title: 'Shipment statuses refreshed', timeLabel: '2 min ago' },
+    { id: 'notif-demand', title: 'New demand post available', timeLabel: '5 min ago' },
+  ]
 
   const onLogout = () => {
     clearStoredAuth()
@@ -27,6 +35,8 @@ function Navbar({ user }) {
         <Link to="/profile" className="nav-item"><UserRound size={16} />Profile</Link>
       </nav>
       <div className="user-meta">
+        <KeyboardShortcuts onOpenPalette={onOpenPalette} />
+        <NotificationCenter items={notifications} />
         <span>{user?.full_name || user?.username || 'Guest'}</span>
         {user ? <button onClick={onLogout}>Logout</button> : <Link to="/login">Login</Link>}
       </div>
