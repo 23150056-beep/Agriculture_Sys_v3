@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import Navbar from '../components/common/Navbar'
 import Sidebar from '../components/common/Sidebar'
 import ProtectedRoute from '../components/common/ProtectedRoute'
@@ -58,7 +58,7 @@ function AppLayout({ user, loading }) {
 
 function AppRouter({ user, loading }) {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/login" element={loading ? null : (user ? <Navigate to="/dashboard" replace /> : <LoginPage />)} />
         <Route path="/register" element={loading ? null : (user ? <Navigate to="/dashboard" replace /> : <RegisterPage />)} />
@@ -71,7 +71,7 @@ function AppRouter({ user, loading }) {
           }
         />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
 
