@@ -1,5 +1,6 @@
 from rest_framework import decorators, permissions, response, status, viewsets
 
+from apps.dashboard.services import log_activity
 from apps.users.permissions import IsBuyer
 
 from .models import Order, OrderStatusLog
@@ -24,6 +25,13 @@ class OrderViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         order = serializer.save(buyer=self.request.user)
         OrderStatusLog.objects.create(order=order, from_status="", to_status=order.status, changed_by=self.request.user, note="Order created")
+        log_activity(
+            actor=self.request.user,
+            module="orders",
+            action="create_order",
+            message=f"Created order #{order.id}",
+            metadata={"order_id": order.id, "status": order.status},
+        )
 
     @decorators.action(detail=False, methods=["get"], url_path="my")
     def my_orders(self, request):
@@ -59,6 +67,13 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.status = next_status
         order.save(update_fields=["status", "updated_at"])
         OrderStatusLog.objects.create(order=order, from_status=previous_status, to_status=next_status, changed_by=request.user, note=note)
+        log_activity(
+            actor=request.user,
+            module="orders",
+            action="update_status",
+            message=f"Updated order #{order.id} from {previous_status} to {next_status}",
+            metadata={"order_id": order.id, "from_status": previous_status, "to_status": next_status},
+        )
         return response.Response(self.get_serializer(order).data)
 
     @decorators.action(detail=True, methods=["get"], url_path="timeline")

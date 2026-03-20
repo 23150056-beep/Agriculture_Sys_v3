@@ -1,5 +1,6 @@
 from rest_framework import decorators, permissions, response, status, viewsets
 
+from apps.dashboard.services import log_activity
 from apps.users.permissions import IsDispatcher
 
 from .models import DeliveryProof, Driver, Shipment, Trip, Vehicle
@@ -71,6 +72,13 @@ class ShipmentViewSet(viewsets.ModelViewSet):
         shipment.trip_id = trip_id
         shipment.status = "SCHEDULED"
         shipment.save(update_fields=["trip", "status"])
+        log_activity(
+            actor=request.user,
+            module="logistics",
+            action="assign_shipment",
+            message=f"Assigned shipment #{shipment.id} to trip #{trip.id}",
+            metadata={"shipment_id": shipment.id, "trip_id": trip.id},
+        )
         return response.Response(self.get_serializer(shipment).data)
 
     @decorators.action(detail=False, methods=["post"], url_path="capacity-check")
@@ -104,6 +112,13 @@ class ShipmentViewSet(viewsets.ModelViewSet):
             shipment.order.status = "DELIVERED"
             shipment.order.save(update_fields=["status", "updated_at"])
         shipment.save(update_fields=["status"])
+        log_activity(
+            actor=request.user,
+            module="logistics",
+            action="update_shipment_status",
+            message=f"Updated shipment #{shipment.id} to {next_status}",
+            metadata={"shipment_id": shipment.id, "status": next_status},
+        )
         return response.Response(self.get_serializer(shipment).data)
 
     @decorators.action(detail=True, methods=["post"], url_path="proof-of-delivery")
@@ -121,4 +136,11 @@ class ShipmentViewSet(viewsets.ModelViewSet):
         shipment.save(update_fields=["status"])
         shipment.order.status = "DELIVERED"
         shipment.order.save(update_fields=["status", "updated_at"])
+        log_activity(
+            actor=request.user,
+            module="logistics",
+            action="proof_of_delivery",
+            message=f"Uploaded proof of delivery for shipment #{shipment.id}",
+            metadata={"shipment_id": shipment.id, "pod_id": pod.id},
+        )
         return response.Response(DeliveryProofSerializer(pod).data, status=status.HTTP_201_CREATED)

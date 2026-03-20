@@ -1,5 +1,13 @@
 const STORAGE_KEY = 'activity-log-v1'
 
+const asDisplayEntry = (entry) => ({
+  id: entry.id || `log-${Date.now()}`,
+  at: entry.created_at || entry.at || new Date().toISOString(),
+  title: entry.message || entry.title || 'Activity event',
+  module: entry.module || 'ui',
+  action: entry.action || 'event',
+})
+
 const readLog = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -25,10 +33,32 @@ export const addActivityLog = (entry) => {
   ].slice(0, 40)
 
   writeLog(next)
+
+  // Fire-and-forget sync to backend when available.
+  import('../api/dashboardApi')
+    .then(({ createActivityEvent }) => createActivityEvent({
+      module: entry.module || 'ui',
+      action: entry.action || 'event',
+      message: entry.title || 'Activity event',
+      metadata: entry.metadata || {},
+    }))
+    .catch(() => {})
 }
 
 export const getActivityLog = () => readLog()
 
+export const syncActivityLogFromServer = async () => {
+  const { getActivityEvents } = await import('../api/dashboardApi')
+  const { data } = await getActivityEvents()
+  const mapped = Array.isArray(data) ? data.map(asDisplayEntry) : []
+  writeLog(mapped)
+  return mapped
+}
+
 export const clearActivityLog = () => {
   localStorage.removeItem(STORAGE_KEY)
+
+  import('../api/dashboardApi')
+    .then(({ clearActivityEvents }) => clearActivityEvents())
+    .catch(() => {})
 }
