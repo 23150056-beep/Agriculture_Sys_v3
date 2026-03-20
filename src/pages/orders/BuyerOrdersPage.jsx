@@ -1,13 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ShoppingCart } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { getLocations } from '../../api/catalogApi'
 import { getListings } from '../../api/listingsApi'
+import DynamicAutoRefreshBadge from '../../components/dynamic/AutoRefreshBadge'
+import SavedViewPicker from '../../components/dynamic/SavedViewPicker'
 import DataTable from '../../components/common/DataTable'
 import EmptyState from '../../components/common/EmptyState'
 import ErrorState from '../../components/common/ErrorState'
 import FilterBar from '../../components/common/FilterBar'
 import ImageCard from '../../components/common/ImageCard'
+import SkeletonLoader from '../../components/common/SkeletonLoader'
 import { getMyOrders } from '../../api/ordersApi'
 import { createOrder } from '../../api/ordersApi'
 import ProgressStepper from '../../components/common/ProgressStepper'
@@ -18,6 +21,8 @@ import { formatCurrency } from '../../utils/formatCurrency'
 import { ORDER_STATUSES } from '../../utils/constants'
 import heroImage from '../../assets/hero.png'
 import { getProduceFallbackImage } from '../../utils/produceImage'
+import useAutoRefresh from '../../hooks/useAutoRefresh'
+import useSavedViews from '../../hooks/useSavedViews'
 
 function BuyerOrdersPage() {
   const [orders, setOrders] = useState([])
@@ -32,10 +37,22 @@ function BuyerOrdersPage() {
     expected_delivery_date: '',
   })
   const [query, setQuery] = useState('')
-  const listingById = listings.reduce((acc, item) => {
+  const [statusFilter, setStatusFilter] = useState('ALL')
+  const [loading, setLoading] = useState(true)
+
+  const {
+    views,
+    selectedView,
+    selectedViewId,
+    setSelectedViewId,
+    saveView,
+    deleteView,
+  } = useSavedViews('saved-views-orders-buyer')
+
+  const listingById = useMemo(() => listings.reduce((acc, item) => {
     acc[item.id] = item
     return acc
-  }, {})
+  }, {}), [listings])
 
   const getOrderProductName = (order) => (
     order.listing_product_name
@@ -48,21 +65,36 @@ function BuyerOrdersPage() {
     return order.listing_image || listingById[order.listing]?.images?.[0]?.image || getProduceFallbackImage(productName, heroImage)
   }
 
-  const filteredOrders = orders.filter((order) => `${order.id}`.includes(query) || `${order.status}`.toLowerCase().includes(query.toLowerCase()))
+  const filteredOrders = orders.filter((order) => {
+    const textMatch = `${order.id}`.includes(query) || `${order.status}`.toLowerCase().includes(query.toLowerCase())
+    if (!textMatch) return false
+    if (statusFilter === 'ALL') return true
+    return order.status === statusFilter
+  })
 
-  const loadData = () => {
-    Promise.all([getMyOrders(), getListings(), getLocations()])
-      .then(([ordersResponse, listingsResponse, locationsResponse]) => {
-        setOrders(ordersResponse.data)
-        setListings(listingsResponse.data)
-        setLocations(locationsResponse.data)
-      })
-      .catch(() => setError('Failed to load order data'))
-  }
+  const statuses = ['ALL', ...new Set(orders.map((order) => order.status))]
+
+  const loadData = useCallback(async () => {
+    try {
+      const [ordersResponse, listingsResponse, locationsResponse] = await Promise.all([getMyOrders(), getListings(), getLocations()])
+      setOrders(ordersResponse.data)
+      setListings(listingsResponse.data)
+      setLocations(locationsResponse.data)
+      setError('')
+    } catch {
+      setError('Failed to load order data')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const { isActive, setIsActive, lastUpdated, refreshNow } = useAutoRefresh(loadData, {
+    intervalMs: 60000,
+  })
 
   useEffect(() => {
-    loadData()
-  }, [])
+    refreshNow()
+  }, [refreshNow])
 
   useEffect(() => {
     if (!message && !error) return
@@ -73,6 +105,12 @@ function BuyerOrdersPage() {
 
     return () => clearTimeout(timer)
   }, [message, error])
+
+  useEffect(() => {
+    if (!selectedView) return
+    setQuery(selectedView.filters.query || '')
+    setStatusFilter(selectedView.filters.statusFilter || 'ALL')
+  }, [selectedView])
 
   const onChange = (event) => {
     const { name, value } = event.target
@@ -103,6 +141,13 @@ function BuyerOrdersPage() {
         icon={ShoppingCart}
         title="Buyer Orders"
         subtitle="Create and monitor purchase orders from marketplace listings."
+      />
+      <DynamicAutoRefreshBadge
+        active={isActive}
+        seconds={60}
+        lastUpdated={lastUpdated}
+        onToggle={() => setIsActive((prev) => !prev)}
+        onRefresh={refreshNow}
       />
 
       <p className="section-label">Create New Order</p>
@@ -139,7 +184,27 @@ function BuyerOrdersPage() {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
+        <div className="chip-row">
+          {statuses.map((status) => (
+            <button
+              key={status}
+              type="button"
+              className={`chip ${statusFilter === status ? 'active' : ''}`}
+              onClick={() => setStatusFilter(status)}
+            >
+              {status}
+            </button>
+          ))}
+        </div>
+        <SavedViewPicker
+          views={views}
+          selectedViewId={selectedViewId}
+          onSelect={setSelectedViewId}
+          onSave={(name) => saveView(name, { query, statusFilter })}
+          onDelete={deleteView}
+        />
       </FilterBar>
+      {loading ? <SkeletonLoader lines={4} variant="table" /> : null}
       <div className="desktop-list">
         <DataTable
           rowKey="id"

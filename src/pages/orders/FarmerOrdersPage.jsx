@@ -1,16 +1,21 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ClipboardCheck } from 'lucide-react'
+import DynamicAutoRefreshBadge from '../../components/dynamic/AutoRefreshBadge'
+import SavedViewPicker from '../../components/dynamic/SavedViewPicker'
 import DataTable from '../../components/common/DataTable'
 import EmptyState from '../../components/common/EmptyState'
 import ErrorState from '../../components/common/ErrorState'
 import FilterBar from '../../components/common/FilterBar'
 import ImageCard from '../../components/common/ImageCard'
+import SkeletonLoader from '../../components/common/SkeletonLoader'
 import { getFarmerOrders, updateOrderStatus } from '../../api/ordersApi'
 import PageHeader from '../../components/common/PageHeader'
 import StatusBadge from '../../components/common/StatusBadge'
 import Toast from '../../components/common/Toast'
 import heroImage from '../../assets/hero.png'
 import { getProduceFallbackImage } from '../../utils/produceImage'
+import useAutoRefresh from '../../hooks/useAutoRefresh'
+import useSavedViews from '../../hooks/useSavedViews'
 
 const STATUS_OPTIONS = ['CONFIRMED', 'PACKED', 'ASSIGNED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED']
 
@@ -19,19 +24,49 @@ function FarmerOrdersPage() {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [query, setQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState('ALL')
+  const [loading, setLoading] = useState(true)
+
+  const {
+    views,
+    selectedView,
+    selectedViewId,
+    setSelectedViewId,
+    saveView,
+    deleteView,
+  } = useSavedViews('saved-views-orders-farmer')
+
   const getOrderProductName = (order) => order.listing_product_name || `Product #${order.listing}`
   const getOrderImage = (order) => order.listing_image || getProduceFallbackImage(getOrderProductName(order), heroImage)
-  const filteredOrders = orders.filter((order) => `${order.id}`.includes(query) || `${order.status}`.toLowerCase().includes(query.toLowerCase()))
 
-  const loadOrders = () => {
-    getFarmerOrders()
-      .then(({ data }) => setOrders(data))
-      .catch(() => setError('Failed to load farmer orders'))
-  }
+  const filteredOrders = orders.filter((order) => {
+    const textMatch = `${order.id}`.includes(query) || `${order.status}`.toLowerCase().includes(query.toLowerCase())
+    if (!textMatch) return false
+    if (statusFilter === 'ALL') return true
+    return order.status === statusFilter
+  })
+
+  const statuses = ['ALL', ...new Set(orders.map((order) => order.status))]
+
+  const loadOrders = useCallback(async () => {
+    try {
+      const { data } = await getFarmerOrders()
+      setOrders(data)
+      setError('')
+    } catch {
+      setError('Failed to load farmer orders')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const { isActive, setIsActive, lastUpdated, refreshNow } = useAutoRefresh(loadOrders, {
+    intervalMs: 60000,
+  })
 
   useEffect(() => {
-    loadOrders()
-  }, [])
+    refreshNow()
+  }, [refreshNow])
 
   useEffect(() => {
     if (!message && !error) return
@@ -43,13 +78,19 @@ function FarmerOrdersPage() {
     return () => clearTimeout(timer)
   }, [message, error])
 
+  useEffect(() => {
+    if (!selectedView) return
+    setQuery(selectedView.filters.query || '')
+    setStatusFilter(selectedView.filters.statusFilter || 'ALL')
+  }, [selectedView])
+
   const onStatusChange = async (orderId, status) => {
     setError('')
     setMessage('')
     try {
       await updateOrderStatus(orderId, { status, note: 'Updated by farmer module' })
       setMessage(`Order #${orderId} updated to ${status}`)
-      loadOrders()
+      refreshNow()
     } catch {
       setError('Could not update order status. Ensure transition is valid.')
     }
@@ -62,6 +103,13 @@ function FarmerOrdersPage() {
         title="Farmer Orders"
         subtitle="Manage status transitions for orders tied to your listings."
       />
+      <DynamicAutoRefreshBadge
+        active={isActive}
+        seconds={60}
+        lastUpdated={lastUpdated}
+        onToggle={() => setIsActive((prev) => !prev)}
+        onRefresh={refreshNow}
+      />
       <Toast message={message} type="success" />
       {error ? <ErrorState message={error} /> : null}
       <FilterBar>
@@ -70,7 +118,27 @@ function FarmerOrdersPage() {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
+        <div className="chip-row">
+          {statuses.map((status) => (
+            <button
+              key={status}
+              type="button"
+              className={`chip ${statusFilter === status ? 'active' : ''}`}
+              onClick={() => setStatusFilter(status)}
+            >
+              {status}
+            </button>
+          ))}
+        </div>
+        <SavedViewPicker
+          views={views}
+          selectedViewId={selectedViewId}
+          onSelect={setSelectedViewId}
+          onSave={(name) => saveView(name, { query, statusFilter })}
+          onDelete={deleteView}
+        />
       </FilterBar>
+      {loading ? <SkeletonLoader lines={4} variant="table" /> : null}
       <div className="desktop-list">
         <DataTable
           rowKey="id"
