@@ -81,3 +81,44 @@ Default password: `demo12345`
 
 - Frontend API client is configured to use `http://127.0.0.1:8000/api`.
 - This is a base prototype implementation; forms and workflows can be expanded module by module.
+
+## Share Live Output Via GitHub
+
+To let your group open and use the system in a browser (not just read code), deploy:
+
+- Backend API to Render
+- Frontend to Vercel
+
+### 1) Deploy backend (Render)
+
+1. Go to Render and click **New +** -> **Web Service**.
+2. Connect this GitHub repository: `23150056-beep/Agriculture_Sys_v3`.
+3. Configure:
+	- Root Directory: `backend`
+	- Build Command: `pip install -r requirements.txt && python manage.py migrate && python manage.py seed_demo --reset`
+	- Start Command: `gunicorn config.wsgi:application`
+4. Add environment variables:
+	- `SECRET_KEY` = any long random string
+	- `DEBUG` = `False`
+	- `ALLOWED_HOSTS` = your Render host (example: `agriculture-sys-v3.onrender.com`)
+	- `CORS_ALLOWED_ORIGINS` = your frontend URL (set this after Vercel deploy)
+5. Deploy and copy your backend URL, for example:
+	- `https://agriculture-sys-v3.onrender.com`
+
+API base URL will be:
+
+- `https://agriculture-sys-v3.onrender.com/api`
+
+### 2) Deploy frontend (Vercel)
+
+1. Go to Vercel and click **Add New** -> **Project**.
+2. Import the same GitHub repository.
+3. Set environment variable before deploy:
+	- `VITE_API_BASE_URL` = `https://YOUR_RENDER_DOMAIN/api`
+4. Deploy and copy the Vercel URL.
+
+### 3) Final link to share with group
+
+Share the Vercel URL. That is your live system output link.
+
+If login is required, use demo users from `seed_demo` in this README.
