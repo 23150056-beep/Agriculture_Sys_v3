@@ -3,22 +3,14 @@ import { getMe } from '../api/authApi'
 import { getStoredDemoUser } from '../utils/demoAuth'
 
 export const useAuth = () => {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const initialDemoUser = getStoredDemoUser()
+  const hasInitialToken = Boolean(localStorage.getItem('accessToken'))
+  const [user, setUser] = useState(initialDemoUser)
+  const [loading, setLoading] = useState(!initialDemoUser && hasInitialToken)
 
   useEffect(() => {
-    const demoUser = getStoredDemoUser()
-    if (demoUser) {
-      setUser(demoUser)
-      setLoading(false)
-      return
-    }
-
     const token = localStorage.getItem('accessToken')
-    if (!token) {
-      setLoading(false)
-      return
-    }
+    if (!token) return
 
     getMe()
       .then(({ data }) => setUser(data))
