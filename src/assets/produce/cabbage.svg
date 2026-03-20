@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="t d">
+  <title id="t">Cabbage</title>
+  <desc id="d">Illustration of a cabbage.</desc>
+  <defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#eef9e9"/><stop offset="100%" stop-color="#d5efc8"/></linearGradient></defs>
+  <rect width="320" height="220" rx="18" fill="url(#bg)"/>
+  <circle cx="160" cy="122" r="62" fill="#77bc61"/>
+  <path d="M120 122 C130 98 150 86 176 88" fill="none" stroke="#5ea44f" stroke-width="6"/>
+  <path d="M110 132 C130 116 160 108 198 114" fill="none" stroke="#5ea44f" stroke-width="6"/>
+  <path d="M124 156 C145 134 172 126 198 130" fill="none" stroke="#5ea44f" stroke-width="6"/>
+  <text x="20" y="198" font-family="Segoe UI, Arial, sans-serif" font-size="24" fill="#2f6425" font-weight="700">Cabbage</text>
+</svg>

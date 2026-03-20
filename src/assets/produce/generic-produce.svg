@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="t d">
+  <title id="t">Produce</title>
+  <desc id="d">Generic produce illustration.</desc>
+  <defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#eef6f0"/><stop offset="100%" stop-color="#d4e7d9"/></linearGradient></defs>
+  <rect width="320" height="220" rx="18" fill="url(#bg)"/>
+  <circle cx="132" cy="124" r="44" fill="#7abb63"/>
+  <circle cx="186" cy="118" r="36" fill="#f0b247"/>
+  <path d="M180 86 C176 74 182 64 196 58" fill="none" stroke="#8b5f2c" stroke-width="6" stroke-linecap="round"/>
+  <text x="20" y="198" font-family="Segoe UI, Arial, sans-serif" font-size="24" fill="#325d3a" font-weight="700">Produce</text>
+</svg>

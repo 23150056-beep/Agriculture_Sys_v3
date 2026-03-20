@@ -8,7 +8,12 @@ from .services import is_valid_transition
 
 
 class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.select_related("buyer", "listing", "delivery_location").prefetch_related("timeline").all().order_by("-created_at")
+    queryset = (
+        Order.objects.select_related("buyer", "listing", "listing__product", "delivery_location")
+        .prefetch_related("timeline", "listing__images")
+        .all()
+        .order_by("-created_at")
+    )
     serializer_class = OrderSerializer
 
     def get_permissions(self):

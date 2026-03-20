@@ -4,11 +4,13 @@ import DataTable from '../../components/common/DataTable'
 import EmptyState from '../../components/common/EmptyState'
 import ErrorState from '../../components/common/ErrorState'
 import FilterBar from '../../components/common/FilterBar'
-import MobileDataCard from '../../components/common/MobileDataCard'
+import ImageCard from '../../components/common/ImageCard'
 import { getFarmerOrders, updateOrderStatus } from '../../api/ordersApi'
 import PageHeader from '../../components/common/PageHeader'
 import StatusBadge from '../../components/common/StatusBadge'
 import Toast from '../../components/common/Toast'
+import heroImage from '../../assets/hero.png'
+import { getProduceFallbackImage } from '../../utils/produceImage'
 
 const STATUS_OPTIONS = ['CONFIRMED', 'PACKED', 'ASSIGNED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED']
 
@@ -17,6 +19,9 @@ function FarmerOrdersPage() {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [query, setQuery] = useState('')
+  const getOrderProductName = (order) => order.listing_product_name || `Product #${order.listing}`
+  const getOrderImage = (order) => order.listing_image || getProduceFallbackImage(getOrderProductName(order), heroImage)
+  const filteredOrders = orders.filter((order) => `${order.id}`.includes(query) || `${order.status}`.toLowerCase().includes(query.toLowerCase()))
 
   const loadOrders = () => {
     getFarmerOrders()
@@ -69,10 +74,24 @@ function FarmerOrdersPage() {
       <div className="desktop-list">
         <DataTable
           rowKey="id"
-          rows={orders.filter((order) => `${order.id}`.includes(query) || `${order.status}`.toLowerCase().includes(query.toLowerCase()))}
+          rows={filteredOrders}
           emptyFallback={<EmptyState title="No farmer orders" description="Orders tied to your listings will appear here." />}
           columns={[
             { key: 'id', label: 'Order', render: (order) => `#${order.id}` },
+            {
+              key: 'thumbnail',
+              label: 'Image',
+              render: (order) => (
+                <img
+                  className="table-thumb"
+                  src={getOrderImage(order)}
+                  alt={getOrderProductName(order)}
+                  loading="lazy"
+                  onError={(event) => { event.currentTarget.src = getProduceFallbackImage(getOrderProductName(order), heroImage) }}
+                />
+              ),
+            },
+            { key: 'product', label: 'Product', render: (order) => getOrderProductName(order) },
             { key: 'status', label: 'Status', render: (order) => <StatusBadge value={order.status} /> },
             {
               key: 'action',
@@ -90,23 +109,22 @@ function FarmerOrdersPage() {
         />
       </div>
       <div className="mobile-card-list">
-        {orders
-          .filter((order) => `${order.id}`.includes(query) || `${order.status}`.toLowerCase().includes(query.toLowerCase()))
-          .map((order) => (
-            <MobileDataCard
-              key={order.id}
-              title={`Order #${order.id}`}
-              rows={[{ label: 'Status', value: order.status }]}
-              actions={
-                <select defaultValue="" onChange={(event) => onStatusChange(order.id, event.target.value)}>
-                  <option value="" disabled>Update status</option>
-                  {STATUS_OPTIONS.map((status) => (
-                    <option key={status} value={status}>{status}</option>
-                  ))}
-                </select>
-              }
-            />
-          ))}
+        {filteredOrders.map((order) => (
+          <ImageCard
+            key={order.id}
+            image={getOrderImage(order)}
+            fallback={getProduceFallbackImage(getOrderProductName(order), heroImage)}
+            title={`Order #${order.id} - ${getOrderProductName(order)}`}
+          >
+            <p><strong>Status:</strong> {order.status}</p>
+            <select defaultValue="" onChange={(event) => onStatusChange(order.id, event.target.value)}>
+              <option value="" disabled>Update status</option>
+              {STATUS_OPTIONS.map((status) => (
+                <option key={status} value={status}>{status}</option>
+              ))}
+            </select>
+          </ImageCard>
+        ))}
       </div>
     </section>
   )

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="t d">
+  <title id="t">Tomato</title>
+  <desc id="d">Illustration of a tomato.</desc>
+  <defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#ffe7df"/><stop offset="100%" stop-color="#ffd1c3"/></linearGradient></defs>
+  <rect width="320" height="220" rx="18" fill="url(#bg)"/>
+  <circle cx="160" cy="124" r="58" fill="#e84c3d"/>
+  <path d="M160 64 L150 82 L130 84 L146 96 L142 116 L160 106 L178 116 L174 96 L190 84 L170 82 Z" fill="#3f8f42"/>
+  <text x="20" y="198" font-family="Segoe UI, Arial, sans-serif" font-size="24" fill="#7a241d" font-weight="700">Tomato</text>
+</svg>

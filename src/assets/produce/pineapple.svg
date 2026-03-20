@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="t d">
+  <title id="t">Pineapple</title>
+  <desc id="d">Illustration of a pineapple.</desc>
+  <defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#fff7d9"/><stop offset="100%" stop-color="#ffe7a1"/></linearGradient></defs>
+  <rect width="320" height="220" rx="18" fill="url(#bg)"/>
+  <path d="M136 56 L160 84 L184 56 L170 88 L150 88 Z" fill="#4a9a4a"/>
+  <path d="M124 70 L160 96 L196 70 L174 102 L146 102 Z" fill="#5bae5b"/>
+  <ellipse cx="160" cy="138" rx="48" ry="62" fill="#d89b2f"/>
+  <g stroke="#b67b1e" stroke-width="2">
+    <line x1="124" y1="106" x2="196" y2="170"/>
+    <line x1="124" y1="126" x2="196" y2="190"/>
+    <line x1="196" y1="106" x2="124" y2="170"/>
+    <line x1="196" y1="126" x2="124" y2="190"/>
+  </g>
+  <text x="20" y="198" font-family="Segoe UI, Arial, sans-serif" font-size="24" fill="#6a4a0c" font-weight="700">Pineapple</text>
+</svg>

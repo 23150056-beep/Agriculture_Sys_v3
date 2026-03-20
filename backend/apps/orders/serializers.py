@@ -15,6 +15,8 @@ class OrderStatusLogSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     timeline = OrderStatusLogSerializer(many=True, read_only=True)
+    listing_product_name = serializers.CharField(source="listing.product.name", read_only=True)
+    listing_image = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
@@ -27,3 +29,12 @@ class OrderSerializer(serializers.ModelSerializer):
         validated_data["unit_price_snapshot"] = listing.unit_price
         validated_data["total_price"] = Decimal(quantity) * Decimal(listing.unit_price)
         return super().create(validated_data)
+
+    def get_listing_image(self, obj):
+        first_image = obj.listing.images.first()
+        if not first_image:
+            return None
+        request = self.context.get("request")
+        if request:
+            return request.build_absolute_uri(first_image.image.url)
+        return first_image.image.url

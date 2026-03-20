@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="t d">
+  <title id="t">Banana</title>
+  <desc id="d">Illustration of bananas.</desc>
+  <defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#fff8d8"/><stop offset="100%" stop-color="#fff1ad"/></linearGradient></defs>
+  <rect width="320" height="220" rx="18" fill="url(#bg)"/>
+  <path d="M95 116 C130 174 208 176 246 124" fill="none" stroke="#f3c436" stroke-width="18" stroke-linecap="round"/>
+  <path d="M90 102 C130 166 210 168 252 112" fill="none" stroke="#ffd759" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="94" cy="114" r="6" fill="#6d4a16"/>
+  <circle cx="246" cy="124" r="6" fill="#6d4a16"/>
+  <text x="20" y="198" font-family="Segoe UI, Arial, sans-serif" font-size="24" fill="#6d5206" font-weight="700">Banana</text>
+</svg>

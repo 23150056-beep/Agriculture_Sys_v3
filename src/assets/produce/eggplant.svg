@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="t d">
+  <title id="t">Eggplant</title>
+  <desc id="d">Illustration of an eggplant.</desc>
+  <defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#efe8ff"/><stop offset="100%" stop-color="#ddd0ff"/></linearGradient></defs>
+  <rect width="320" height="220" rx="18" fill="url(#bg)"/>
+  <path d="M108 132 C108 94 142 70 182 76 C218 82 236 112 224 141 C212 168 178 178 146 170 C124 164 108 152 108 132 Z" fill="#6f3ca8"/>
+  <path d="M150 78 C150 66 160 56 176 52" fill="none" stroke="#4d2e77" stroke-width="7" stroke-linecap="round"/>
+  <path d="M176 56 C172 66 176 74 190 82" fill="#5ea44f"/>
+  <text x="20" y="198" font-family="Segoe UI, Arial, sans-serif" font-size="24" fill="#47256d" font-weight="700">Eggplant</text>
+</svg>

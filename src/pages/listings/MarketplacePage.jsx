@@ -9,6 +9,7 @@ import { getListings } from '../../api/listingsApi'
 import PageHeader from '../../components/common/PageHeader'
 import heroImage from '../../assets/hero.png'
 import { formatCurrency } from '../../utils/formatCurrency'
+import { getProduceFallbackImage } from '../../utils/produceImage'
 
 function MarketplacePage() {
   const [listings, setListings] = useState([])
@@ -34,6 +35,7 @@ function MarketplacePage() {
   })
 
   const activeListing = filteredListings.find((entry) => entry.id === expandedId)
+  const getListingImage = (item) => item.images?.[0]?.image || getProduceFallbackImage(item.product_name || item.product, heroImage)
 
   return (
     <section className="panel">
@@ -67,10 +69,10 @@ function MarketplacePage() {
               render: (item) => (
                 <img
                   className="table-thumb"
-                  src={item.images?.[0]?.image || heroImage}
+                  src={getListingImage(item)}
                   alt={item.product_name || `Product ${item.product}`}
                   loading="lazy"
-                  onError={(event) => { event.currentTarget.src = heroImage }}
+                  onError={(event) => { event.currentTarget.src = getProduceFallbackImage(item.product_name || item.product, heroImage) }}
                 />
               ),
             },
@@ -94,8 +96,8 @@ function MarketplacePage() {
         {filteredListings.map((item) => (
           <ImageCard
             key={item.id}
-            image={item.images?.[0]?.image}
-            fallback={heroImage}
+            image={getListingImage(item)}
+            fallback={getProduceFallbackImage(item.product_name || item.product, heroImage)}
             title={item.product_name || `Product #${item.product}`}
           >
             <p><strong>Quantity:</strong> {item.quantity_available} {item.unit}</p>
@@ -109,9 +111,9 @@ function MarketplacePage() {
           <div className="drawer-details">
             <img
               className="drawer-thumb"
-              src={activeListing.images?.[0]?.image || heroImage}
+              src={getListingImage(activeListing)}
               alt={activeListing.product_name || `Product ${activeListing.product}`}
-              onError={(event) => { event.currentTarget.src = heroImage }}
+              onError={(event) => { event.currentTarget.src = getProduceFallbackImage(activeListing.product_name || activeListing.product, heroImage) }}
             />
             <p><strong>Quantity:</strong> {activeListing.quantity_available} {activeListing.unit}</p>
             <p><strong>Price:</strong> {formatCurrency(activeListing.unit_price)}</p>

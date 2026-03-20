@@ -7,7 +7,7 @@ import DataTable from '../../components/common/DataTable'
 import EmptyState from '../../components/common/EmptyState'
 import ErrorState from '../../components/common/ErrorState'
 import FilterBar from '../../components/common/FilterBar'
-import MobileDataCard from '../../components/common/MobileDataCard'
+import ImageCard from '../../components/common/ImageCard'
 import { getMyOrders } from '../../api/ordersApi'
 import { createOrder } from '../../api/ordersApi'
 import ProgressStepper from '../../components/common/ProgressStepper'
@@ -16,6 +16,8 @@ import PageHeader from '../../components/common/PageHeader'
 import Toast from '../../components/common/Toast'
 import { formatCurrency } from '../../utils/formatCurrency'
 import { ORDER_STATUSES } from '../../utils/constants'
+import heroImage from '../../assets/hero.png'
+import { getProduceFallbackImage } from '../../utils/produceImage'
 
 function BuyerOrdersPage() {
   const [orders, setOrders] = useState([])
@@ -30,6 +32,23 @@ function BuyerOrdersPage() {
     expected_delivery_date: '',
   })
   const [query, setQuery] = useState('')
+  const listingById = listings.reduce((acc, item) => {
+    acc[item.id] = item
+    return acc
+  }, {})
+
+  const getOrderProductName = (order) => (
+    order.listing_product_name
+    || listingById[order.listing]?.product_name
+    || `Product #${order.listing}`
+  )
+
+  const getOrderImage = (order) => {
+    const productName = getOrderProductName(order)
+    return order.listing_image || listingById[order.listing]?.images?.[0]?.image || getProduceFallbackImage(productName, heroImage)
+  }
+
+  const filteredOrders = orders.filter((order) => `${order.id}`.includes(query) || `${order.status}`.toLowerCase().includes(query.toLowerCase()))
 
   const loadData = () => {
     Promise.all([getMyOrders(), getListings(), getLocations()])
@@ -124,10 +143,24 @@ function BuyerOrdersPage() {
       <div className="desktop-list">
         <DataTable
           rowKey="id"
-          rows={orders.filter((order) => `${order.id}`.includes(query) || `${order.status}`.toLowerCase().includes(query.toLowerCase()))}
+          rows={filteredOrders}
           emptyFallback={<EmptyState title="No orders found" description="Create an order above to get started." />}
           columns={[
             { key: 'id', label: 'Order', render: (order) => <Link to={`/orders/${order.id}`}>#{order.id}</Link> },
+            {
+              key: 'thumbnail',
+              label: 'Image',
+              render: (order) => (
+                <img
+                  className="table-thumb"
+                  src={getOrderImage(order)}
+                  alt={getOrderProductName(order)}
+                  loading="lazy"
+                  onError={(event) => { event.currentTarget.src = getProduceFallbackImage(getOrderProductName(order), heroImage) }}
+                />
+              ),
+            },
+            { key: 'product', label: 'Product', render: (order) => getOrderProductName(order) },
             { key: 'status', label: 'Status', render: (order) => <StatusBadge value={order.status} /> },
             { key: 'lifecycle', label: 'Lifecycle', render: (order) => <ProgressStepper steps={ORDER_STATUSES} current={order.status} /> },
             { key: 'total_price', label: 'Total', render: (order) => formatCurrency(order.total_price) },
@@ -136,25 +169,20 @@ function BuyerOrdersPage() {
         />
       </div>
       <div className="mobile-card-list">
-        {orders
-          .filter((order) => `${order.id}`.includes(query) || `${order.status}`.toLowerCase().includes(query.toLowerCase()))
-          .map((order) => (
-            <MobileDataCard
-              key={order.id}
-              title={`Order #${order.id}`}
-              rows={[
-                { label: 'Status', value: order.status },
-                { label: 'Total', value: formatCurrency(order.total_price) },
-                { label: 'Expected', value: order.expected_delivery_date || 'N/A' },
-              ]}
-              actions={
-                <>
-                  <ProgressStepper steps={ORDER_STATUSES} current={order.status} />
-                  <Link to={`/orders/${order.id}`}>View Timeline</Link>
-                </>
-              }
-            />
-          ))}
+        {filteredOrders.map((order) => (
+          <ImageCard
+            key={order.id}
+            image={getOrderImage(order)}
+            fallback={getProduceFallbackImage(getOrderProductName(order), heroImage)}
+            title={`Order #${order.id} - ${getOrderProductName(order)}`}
+          >
+            <p><strong>Status:</strong> {order.status}</p>
+            <p><strong>Total:</strong> {formatCurrency(order.total_price)}</p>
+            <p><strong>Expected:</strong> {order.expected_delivery_date || 'N/A'}</p>
+            <ProgressStepper steps={ORDER_STATUSES} current={order.status} />
+            <Link to={`/orders/${order.id}`}>View Timeline</Link>
+          </ImageCard>
+        ))}
       </div>
     </section>
   )
