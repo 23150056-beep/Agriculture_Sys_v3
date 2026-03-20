@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { LogIn } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { loginUser } from '../../api/authApi'
+import { isDemoMode, setStoredDemoUser, tryDemoLogin } from '../../utils/demoAuth'
 
 function LoginPage() {
   const navigate = useNavigate()
@@ -17,6 +18,15 @@ function LoginPage() {
   const onSubmit = async (event) => {
     event.preventDefault()
     setError('')
+
+    const demoUser = tryDemoLogin(form.username, form.password)
+    if (demoUser) {
+      setStoredDemoUser(demoUser)
+      navigate('/dashboard')
+      window.location.reload()
+      return
+    }
+
     try {
       const { data } = await loginUser(form)
       localStorage.setItem('accessToken', data.access)
@@ -24,7 +34,7 @@ function LoginPage() {
       navigate('/dashboard')
       window.location.reload()
     } catch {
-      setError('Invalid credentials')
+      setError(isDemoMode() ? 'Use demo accounts and password demo12345 on GitHub live' : 'Invalid credentials')
     }
   }
 

@@ -1,13 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, PackageSearch, ShoppingBag, Truck, UserRound } from 'lucide-react'
 import { ROLES } from '../../utils/constants'
+import { clearStoredAuth } from '../../utils/demoAuth'
 
 function Navbar({ user }) {
   const navigate = useNavigate()
 
   const onLogout = () => {
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
+    clearStoredAuth()
     navigate('/login')
     window.location.reload()
   }
