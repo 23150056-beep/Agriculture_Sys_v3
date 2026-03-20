@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ShoppingCart } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { getLocations } from '../../api/catalogApi'
 import { getListings } from '../../api/listingsApi'
 import DynamicAutoRefreshBadge from '../../components/dynamic/AutoRefreshBadge'
@@ -25,6 +25,7 @@ import useAutoRefresh from '../../hooks/useAutoRefresh'
 import useSavedViews from '../../hooks/useSavedViews'
 
 function BuyerOrdersPage() {
+  const [searchParams] = useSearchParams()
   const [orders, setOrders] = useState([])
   const [listings, setListings] = useState([])
   const [locations, setLocations] = useState([])
@@ -105,6 +106,13 @@ function BuyerOrdersPage() {
 
     return () => clearTimeout(timer)
   }, [message, error])
+
+  useEffect(() => {
+    const nextQuery = searchParams.get('q') || ''
+    const nextStatus = searchParams.get('status') || 'ALL'
+    setQuery(nextQuery)
+    setStatusFilter(nextStatus)
+  }, [searchParams])
 
   useEffect(() => {
     if (!selectedView) return

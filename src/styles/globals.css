@@ -535,6 +535,29 @@ main {
   margin-top: 0.9rem;
 }
 
+.drilldown-actions {
+  margin-top: 0.55rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.drilldown-actions button {
+  border: 1px solid var(--line);
+  background: #f2f8ef;
+  color: var(--text-muted);
+  box-shadow: none;
+  padding: 0.34rem 0.7rem;
+}
+
+.drilldown-actions button:hover {
+  transform: none;
+  filter: none;
+  box-shadow: none;
+  border-color: var(--line-strong);
+  color: var(--brand-strong);
+}
+
 .range-toggle {
   display: inline-flex;
   border: 1px solid var(--line);

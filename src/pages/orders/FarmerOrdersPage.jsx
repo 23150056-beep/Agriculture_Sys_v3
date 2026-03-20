@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ClipboardCheck } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import DynamicAutoRefreshBadge from '../../components/dynamic/AutoRefreshBadge'
 import SavedViewPicker from '../../components/dynamic/SavedViewPicker'
 import DataTable from '../../components/common/DataTable'
@@ -20,6 +21,7 @@ import useSavedViews from '../../hooks/useSavedViews'
 const STATUS_OPTIONS = ['CONFIRMED', 'PACKED', 'ASSIGNED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED']
 
 function FarmerOrdersPage() {
+  const [searchParams] = useSearchParams()
   const [orders, setOrders] = useState([])
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
@@ -77,6 +79,13 @@ function FarmerOrdersPage() {
 
     return () => clearTimeout(timer)
   }, [message, error])
+
+  useEffect(() => {
+    const nextQuery = searchParams.get('q') || ''
+    const nextStatus = searchParams.get('status') || 'ALL'
+    setQuery(nextQuery)
+    setStatusFilter(nextStatus)
+  }, [searchParams])
 
   useEffect(() => {
     if (!selectedView) return

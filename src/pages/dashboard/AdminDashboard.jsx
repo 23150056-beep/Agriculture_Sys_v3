@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ShieldCheck } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { getSummary } from '../../api/dashboardApi'
 import AutoRefreshBadge from '../../components/common/AutoRefreshBadge'
+import DrilldownChartCard from '../../components/charts/DrilldownChartCard'
 import EmptyState from '../../components/common/EmptyState'
 import HeroBanner from '../../components/common/HeroBanner'
-import InteractiveChartCard from '../../components/common/InteractiveChartCard'
 import LiveActivityFeed from '../../components/common/LiveActivityFeed'
 import ErrorState from '../../components/common/ErrorState'
 import KpiCard from '../../components/common/KpiCard'
@@ -15,6 +15,7 @@ import TimeRangeToggle from '../../components/common/TimeRangeToggle'
 import heroImage from '../../assets/hero.png'
 
 function AdminDashboard() {
+  const navigate = useNavigate()
   const [totals, setTotals] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
@@ -82,6 +83,8 @@ function AdminDashboard() {
     return ranking[0].route
   }, [totals])
 
+  const drilldownStatuses = ['PENDING', 'CONFIRMED', 'IN_TRANSIT', 'DELIVERED']
+
   return (
     <div className="panel">
       <PageHeader
@@ -111,11 +114,13 @@ function AdminDashboard() {
           <div className="dashboard-dynamic-grid">
             <div>
               <TimeRangeToggle value={range} onChange={setRange} />
-              <InteractiveChartCard
+              <DrilldownChartCard
                 title="Orders Trend"
                 summary={trendData.summary}
                 points={trendData.points}
                 range={range}
+                labels={drilldownStatuses}
+                onPointSelect={(_, label) => navigate(`/orders/buyer?status=${encodeURIComponent(label)}`)}
               />
             </div>
             <LiveActivityFeed items={activity} />
