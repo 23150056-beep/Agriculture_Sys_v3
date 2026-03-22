@@ -63,12 +63,6 @@ urlpatterns = [
     path("api/v4/deliveries/assign/", delivery_assign, name="v4-delivery-assign"),
     path("api/v4/deliveries/<int:pk>/status/", delivery_status, name="v4-delivery-status"),
     path("api/v4/deliveries/<int:pk>/proof/", delivery_proof, name="v4-delivery-proof"),
-    path("api/v4/recommendations/", include("apps.recommendations.urls")),
-    path("api/v4/manager/", include("apps.prioritization.urls")),
-    path("api/v4/reliability/", include("apps.reliability.urls")),
-    path("api/v4/exceptions/", include("apps.exceptions.urls")),
-    path("api/v4/season-plans/", include("apps.season_planner.urls")),
-    path("api/v4/", include("apps.analytics.urls")),
     path("api/v4/", include(router_v4.urls)),
 ]
 

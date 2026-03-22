@@ -10,16 +10,10 @@ from django.utils import timezone
 
 from apps.catalog.models import Category, Product
 from apps.demand_board.models import DemandOffer, DemandPost
-from apps.analytics.models import CommitmentActualSnapshot, WeeklyReport
-from apps.exceptions.models import ExceptionCase
 from apps.listings.models import Listing
 from apps.locations.models import Location
 from apps.logistics.models import Driver, Shipment, Trip, Vehicle
 from apps.orders.models import Order, OrderStatusLog
-from apps.prioritization.models import PriorityScore
-from apps.recommendations.models import GuidedAction, ReorderAlert, RequestRecommendation
-from apps.reliability.models import DeliveryScore
-from apps.season_planner.models import SeasonMilestone, SeasonPlan
 
 User = get_user_model()
 
@@ -64,16 +58,6 @@ class Command(BaseCommand):
                 Product.objects.filter(name__startswith="DEMO ").delete()
                 Category.objects.filter(name__startswith="Demo ").delete()
                 Location.objects.filter(province__startswith="DemoProvince").delete()
-                CommitmentActualSnapshot.objects.filter(distributor__username__in=demo_usernames).delete()
-                WeeklyReport.objects.filter(generated_by__username__in=demo_usernames).delete()
-                ExceptionCase.objects.all().delete()
-                PriorityScore.objects.filter(request__buyer__username__in=demo_usernames).delete()
-                RequestRecommendation.objects.filter(distributor__username__in=demo_usernames).delete()
-                ReorderAlert.objects.all().delete()
-                GuidedAction.objects.filter(user__username__in=demo_usernames).delete()
-                DeliveryScore.objects.filter(delivery__order__buyer__username__in=demo_usernames).delete()
-                SeasonMilestone.objects.filter(season_plan__distributor__username__in=demo_usernames).delete()
-                SeasonPlan.objects.filter(distributor__username__in=demo_usernames).delete()
                 User.objects.filter(username__in=demo_usernames).delete()
             except OperationalError:
                 self.stdout.write("Demo tables not present yet, skipping reset cleanup.")
@@ -296,114 +280,9 @@ class Command(BaseCommand):
                 status="PENDING",
             )
 
-        # Seed feature-expansion module records for prototype demos.
-        for index, order in enumerate(orders):
-            PriorityScore.objects.update_or_create(
-                request=order,
-                defaults={
-                    "score_total": Decimal(str(70 + (index % 20))),
-                    "factors_json": {
-                        "urgency": 20,
-                        "waiting_time": 15,
-                        "stock_risk": 20,
-                        "distributor_reliability": 15,
-                    },
-                },
-            )
-
-            RequestRecommendation.objects.create(
-                distributor=users["distributor_1" if index % 2 == 0 else "distributor_2"],
-                product=order.listing.product,
-                suggested_qty=order.quantity + Decimal("5.00"),
-                confidence=Decimal("0.65"),
-                reason_json={"source": "seed_demo", "hint": "historical average + buffer"},
-            )
-
-        for shipment in Shipment.objects.filter(order__in=orders):
-            DeliveryScore.objects.update_or_create(
-                delivery=shipment,
-                defaults={
-                    "on_time_score": Decimal("85.00"),
-                    "proof_score": Decimal("75.00"),
-                    "completion_score": Decimal("80.00"),
-                    "total_score": Decimal("80.50"),
-                },
-            )
-
-        for product in products[:4]:
-            ReorderAlert.objects.create(
-                product=product,
-                location=locations[0],
-                risk_level="MEDIUM",
-                projected_stockout_date=today + timedelta(days=9),
-                status="OPEN",
-            )
-
-        for user_key in ["distributor_1", "distributor_2", "manager_1", "manager_2"]:
-            GuidedAction.objects.create(
-                user=users[user_key],
-                role=users[user_key].role,
-                action_type="NEXT_STEP",
-                title=f"Review pending operations for {users[user_key].username}",
-                payload_json={"source": "seed_demo"},
-                priority=80,
-                is_done=False,
-            )
-
-        for index, order in enumerate(orders[:4]):
-            ExceptionCase.objects.create(
-                exception_type="REQUEST_STALLED",
-                entity_type="request",
-                entity_id=order.id,
-                severity="MEDIUM",
-                owner_role="MANAGER",
-                status="OPEN",
-            )
-
-        for index, distributor in enumerate([users["distributor_1"], users["distributor_2"]]):
-            plan = SeasonPlan.objects.create(
-                distributor=distributor,
-                product=products[index],
-                season_name=f"Demo Season {index + 1}",
-                start_date=today,
-                target_harvest_date=today + timedelta(days=60),
-                area_size=Decimal("1.50") + Decimal(str(index)),
-                status="ACTIVE",
-            )
-            SeasonMilestone.objects.create(
-                season_plan=plan,
-                milestone_type="PLANTING",
-                due_date=today + timedelta(days=3),
-            )
-            SeasonMilestone.objects.create(
-                season_plan=plan,
-                milestone_type="HARVEST",
-                due_date=today + timedelta(days=58),
-            )
-
-        WeeklyReport.objects.create(
-            week_start=today - timedelta(days=today.weekday()),
-            week_end=today - timedelta(days=today.weekday()) + timedelta(days=6),
-            generated_by=users["admin"],
-            summary_json={"seeded": True, "requests": len(orders), "shipments": Shipment.objects.filter(order__in=orders).count()},
-        )
-
-        for index, post in enumerate(demand_posts[:3]):
-            distributor = users["distributor_1" if index % 2 == 0 else "distributor_2"]
-            committed = Decimal(str(40 + index * 5))
-            actual = Decimal(str(35 + index * 4))
-            CommitmentActualSnapshot.objects.create(
-                demand_post=post,
-                distributor=distributor,
-                committed_qty=committed,
-                actual_delivered_qty=actual,
-                variance_qty=committed - actual,
-                snapshot_date=today,
-            )
-
         self.stdout.write(self.style.SUCCESS("Demo seed complete."))
         self.stdout.write("Accounts password: {}".format(password))
-        self.stdout.write("Created: 5 users, 10 products, 20 listings, 8 requests, 3 trips, 5 demand posts")
+    self.stdout.write("Created: 5 users, 10 products, 20 listings, 8 requests, 3 trips, 5 demand posts")
 
     def _upsert_user(self, username, role, full_name, email, phone, password, is_staff=False, is_superuser=False):
         user, _ = User.objects.update_or_create(

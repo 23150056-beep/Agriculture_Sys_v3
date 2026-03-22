@@ -26,12 +26,6 @@ INSTALLED_APPS = [
     "apps.logistics",
     "apps.demand_board",
     "apps.dashboard",
-    "apps.recommendations",
-    "apps.prioritization",
-    "apps.reliability",
-    "apps.exceptions",
-    "apps.season_planner",
-    "apps.analytics",
 ]
 
 MIDDLEWARE = [
