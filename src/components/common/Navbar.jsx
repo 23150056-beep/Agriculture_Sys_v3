@@ -44,7 +44,7 @@ function Navbar({ user, onOpenPalette, densityMode, onChangeDensity }) {
             navigate(item.href)
           }}
         />
-        <span>{user?.full_name || user?.username || 'Guest'}</span>
+        <span className="user-name">{user?.full_name || user?.username || 'Guest'}</span>
         {user ? <button onClick={onLogout}>Logout</button> : <Link to="/login">Login</Link>}
       </div>
     </header>
