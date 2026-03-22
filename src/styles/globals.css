@@ -348,14 +348,27 @@ input[type='checkbox'] {
 }
 
 .saved-views {
-  display: grid;
-  grid-template-columns: 170px 1fr auto auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 0.4rem;
   width: 100%;
 }
 
+.saved-views select {
+  flex: 1 1 170px;
+  min-width: 0;
+}
+
+.saved-views input {
+  flex: 2 1 220px;
+  min-width: 0;
+}
+
 .saved-views button {
+  flex: 0 0 auto;
   padding: 0.55rem 0.8rem;
+  white-space: nowrap;
 }
 
 .bulk-actions {
@@ -1129,9 +1142,14 @@ main {
 
 .filter-bar {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  align-items: start;
   gap: 0.6rem;
   margin-bottom: 0.7rem;
+}
+
+.filter-bar > * {
+  min-width: 0;
 }
 
 .table-wrap {
@@ -1593,12 +1611,13 @@ main {
   width: 24rem;
   max-width: 95vw;
   height: 100vh;
-  z-index: 30;
+  z-index: 80;
   background: linear-gradient(170deg, #f7fbf4 0%, #eef6e9 100%);
   border-left: 1px solid var(--line);
   padding: 1rem;
   transition: right 0.22s ease;
   box-shadow: -10px 0 28px rgba(28, 48, 32, 0.15);
+  overflow-y: auto;
 }
 
 .detail-drawer.open {
@@ -1643,6 +1662,20 @@ main {
   justify-content: space-between;
   gap: 0.7rem;
   align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 0.2rem 0 0.55rem;
+  background: linear-gradient(170deg, #f7fbf4 0%, #eef6e9 100%);
+}
+
+.detail-drawer-head h3 {
+  margin: 0;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.detail-drawer-head button {
+  padding: 0.42rem 0.78rem;
 }
 
 .drawer-details {
@@ -1782,7 +1815,13 @@ main {
   }
 
   .saved-views {
+    display: grid;
     grid-template-columns: 1fr;
+  }
+
+  .saved-views button {
+    width: 100%;
+    white-space: normal;
   }
 
   .bulk-actions {
