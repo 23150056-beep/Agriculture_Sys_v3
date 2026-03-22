@@ -17,6 +17,13 @@ import BuyerOrdersPage from '../pages/orders/BuyerOrdersPage'
 import FarmerOrdersPage from '../pages/orders/FarmerOrdersPage'
 import OrderDetailsPage from '../pages/orders/OrderDetailsPage'
 import ProfilePage from '../pages/profile/ProfilePage'
+import SeasonPlannerPage from '../pages/distributor/SeasonPlannerPage'
+import SmartRequestPage from '../pages/distributor/SmartRequestPage'
+import PriorityQueuePage from '../pages/manager/PriorityQueuePage'
+import ExceptionCenterPage from '../pages/manager/ExceptionCenterPage'
+import DeliveryReliabilityPage from '../pages/manager/DeliveryReliabilityPage'
+import WeeklySummaryPage from '../pages/admin/WeeklySummaryPage'
+import CommitmentActualPage from '../pages/admin/CommitmentActualPage'
 import { ROLES } from '../utils/constants'
 
 function DashboardSwitch({ user }) {
@@ -45,6 +52,13 @@ function AppLayout({ user, loading }) {
         <Route path="/distribution/board" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.MANAGER, ROLES.ADMIN]}><DispatchBoardPage /></ProtectedRoute>} />
         <Route path="/distribution/tracking" element={<ShipmentTrackingPage />} />
         <Route path="/distribution/planner" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.MANAGER, ROLES.ADMIN]}><TripPlannerPage /></ProtectedRoute>} />
+        <Route path="/distributor/season-planner" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.DISTRIBUTOR, ROLES.ADMIN]}><SeasonPlannerPage /></ProtectedRoute>} />
+        <Route path="/distributor/smart-request" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.DISTRIBUTOR, ROLES.ADMIN]}><SmartRequestPage /></ProtectedRoute>} />
+        <Route path="/manager/priority-queue" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.MANAGER, ROLES.ADMIN]}><PriorityQueuePage /></ProtectedRoute>} />
+        <Route path="/manager/exceptions" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.MANAGER, ROLES.ADMIN]}><ExceptionCenterPage /></ProtectedRoute>} />
+        <Route path="/manager/reliability" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.MANAGER, ROLES.ADMIN]}><DeliveryReliabilityPage /></ProtectedRoute>} />
+        <Route path="/admin/weekly-summary" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.ADMIN]}><WeeklySummaryPage /></ProtectedRoute>} />
+        <Route path="/admin/commitment-actual" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.ADMIN]}><CommitmentActualPage /></ProtectedRoute>} />
         <Route path="/demand-board" element={<DemandBoardPage user={user} />} />
         <Route path="/profile" element={<ProfilePage user={user} />} />
         <Route path="/orders/buyer" element={<Navigate to="/requests/mine" replace />} />
