@@ -13,6 +13,7 @@ function Sidebar({ user }) {
       {user?.role === ROLES.DISTRIBUTOR || user?.role === ROLES.ADMIN ? <Link to="/requests/mine"><ClipboardList size={16} />My Requests</Link> : null}
       {user?.role === ROLES.MANAGER || user?.role === ROLES.ADMIN ? <Link to="/requests/queue"><ClipboardList size={16} />Manager Queue</Link> : null}
       {user?.role === ROLES.MANAGER || user?.role === ROLES.ADMIN ? <Link to="/distribution/board"><Truck size={16} />Distribution</Link> : null}
+      {user?.role === ROLES.ADMIN ? <Link to="/admin/reports"><LayoutDashboard size={16} />Whole Report</Link> : null}
       {(user?.role === ROLES.MANAGER || user?.role === ROLES.DISTRIBUTOR || user?.role === ROLES.ADMIN) ? <Link to="/demand-board"><Megaphone size={16} />Demand Board</Link> : null}
     </aside>
   )

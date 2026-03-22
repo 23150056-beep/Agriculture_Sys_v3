@@ -17,6 +17,7 @@ import BuyerOrdersPage from '../pages/orders/BuyerOrdersPage'
 import FarmerOrdersPage from '../pages/orders/FarmerOrdersPage'
 import OrderDetailsPage from '../pages/orders/OrderDetailsPage'
 import ProfilePage from '../pages/profile/ProfilePage'
+import UnifiedReportsPage from '../pages/admin/UnifiedReportsPage'
 import { ROLES } from '../utils/constants'
 
 function DashboardSwitch({ user }) {
@@ -45,6 +46,7 @@ function AppLayout({ user, loading }) {
         <Route path="/distribution/board" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.MANAGER, ROLES.ADMIN]}><DispatchBoardPage /></ProtectedRoute>} />
         <Route path="/distribution/tracking" element={<ShipmentTrackingPage />} />
         <Route path="/distribution/planner" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.MANAGER, ROLES.ADMIN]}><TripPlannerPage /></ProtectedRoute>} />
+        <Route path="/admin/reports" element={<ProtectedRoute user={user} loading={loading} roles={[ROLES.ADMIN]}><UnifiedReportsPage /></ProtectedRoute>} />
         <Route path="/demand-board" element={<DemandBoardPage user={user} />} />
         <Route path="/profile" element={<ProfilePage user={user} />} />
         <Route path="/orders/buyer" element={<Navigate to="/requests/mine" replace />} />
