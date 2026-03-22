@@ -1,441 +1,252 @@
-# Agriculture Distribution System v3 - Full Technical Details
+# Agriculture Distribution System - Current Technical Details
 
-## v4 Migration Notice
+This document reflects the current implemented state of the system in this repository.
 
-This file remains the detailed reference for current v3 implementation.
+## 1. Current System Snapshot
 
-For v4 migration and replacement planning, use the canonical v4 docs:
+The project currently runs on a v4 business model with three active roles:
 
-- docs/V4_SYSTEM_OVERVIEW.md
-- docs/V4_ROLE_MATRIX.md
-- docs/V4_WORKFLOW_STATE_MACHINE.md
-- docs/V4_API_CONTRACT.md
-- docs/V4_MIGRATION_MAP_FROM_V3.md
-- docs/V4_GLOSSARY.md
+- `ADMIN`
+- `MANAGER`
+- `DISTRIBUTOR`
 
-## 1. System Overview
+The application supports:
 
-Agriculture Distribution System v3 is a full-stack prototype for coordinating produce listings, buyer orders, and dispatcher logistics across four roles:
-
-- Admin
-- Farmer
-- Buyer
-- Dispatcher
-
-The platform supports:
-
-- Role-based dashboards and protected navigation
-- Produce listing and marketplace browsing
-- Buyer order lifecycle and timeline tracking
-- Dispatcher trip planning and shipment assignment
-- Demand board (buyers post demand, farmers offer supply)
-- Activity logging and lightweight analytics
+- Role-based dashboards and guarded routes
+- Supply listing management for distributors
+- Unified request lifecycle and manager approval queue
+- Delivery and shipment operations with POD upload
+- Demand board planning and offers
+- Activity logging and summary metrics
+- Admin whole-system report page with one-click CSV export
 
 ## 2. Technology Stack
 
 ### Frontend
 
-- React 19 + Vite 8
-- React Router DOM 7
-- Axios for API integration
-- Lucide React icons
-- ESLint for linting
+- React 19
+- Vite 8
+- React Router DOM 7 (`HashRouter`)
+- Axios
+- Lucide React
+- ESLint
 
 ### Backend
 
-- Django 5 + Django REST Framework
-- JWT authentication via djangorestframework-simplejwt
-- SQLite database (development)
-- django-cors-headers for CORS
-- Pillow for image handling
+- Django 5
+- Django REST Framework
+- Simple JWT (`djangorestframework-simplejwt`)
+- SQLite (development)
+- CORS via `django-cors-headers`
 
-### Deployment
-
-- Frontend: GitHub Pages via GitHub Actions workflow
-- Backend: local development setup included (production deployment not yet automated)
-
-## 3. High-Level Architecture
+## 3. Core Architecture
 
 ```text
 React (Vite, HashRouter)
-  -> Axios (Bearer token interceptor)
-  -> Django REST API (/api/*)
-  -> SQLite DB
-
-Auth:
-- Local/dev: JWT login against Django
-- GitHub Pages: demo-mode fallback auth in frontend
+  -> Axios client (JWT Bearer token)
+  -> Django REST API (/api/* and /api/v4/*)
+  -> SQLite
 ```
 
-## 4. Repository and Module Layout
+## 4. Role Model and Access
 
-### Root
+Current role enum in `users.User`:
 
-- `README.md`: quick setup and module summary
-- `DEMO_ACCOUNTS.md`: seeded demo users
-- `AGRI_DISTRIBUTION_PROTOTYPE_PLAN.md`: prototype scope and roadmap
-- `.github/workflows/deploy-pages.yml`: frontend deployment pipeline
+- `ADMIN`
+- `MANAGER`
+- `DISTRIBUTOR`
 
-### Frontend (`src/`)
+Permission helpers are implemented in `backend/apps/users/permissions.py`:
 
-- `app/router.jsx`: full route map and route guards
-- `api/`: API wrappers per module
-- `pages/`: auth, dashboard, listings, orders, logistics, demand, profile
-- `components/common/`: shared UI components (shell, table, badges, drawers, etc.)
-- `components/charts/`: drilldown chart components
-- `hooks/`: auth, saved views, keyboard shortcuts, notifications, refresh utilities
-- `utils/`: constants, date/currency formatting, API error parser, CSV export, demo auth
+- `IsAdmin`
+- `IsManager`
+- `IsDistributor`
 
-### Backend (`backend/`)
+## 5. Frontend Routes (Current)
 
-- `config/`: project settings and top-level URLs
-- `apps/users`: user model, auth APIs, role permissions, demo data command
-- `apps/catalog`: categories and products
-- `apps/locations`: location master data
-- `apps/listings`: farmer listings and listing images
-- `apps/orders`: buyer orders and status timeline
-- `apps/logistics`: vehicles, drivers, trips, shipments, delivery proof
-- `apps/demand_board`: demand posts and farmer offers
-- `apps/dashboard`: summary APIs and activity logging
-
-## 5. Frontend Details
-
-## 5.1 Routing and Access Control
-
-The app uses `HashRouter` for GitHub Pages compatibility.
-
-Public routes:
+Public:
 
 - `/login`
 - `/register`
 
-Protected app routes:
+Protected:
 
-- `/dashboard` (role-switching dashboard)
+- `/dashboard`
 - `/marketplace`
-- `/listings/farmer` (farmer/admin)
-- `/listings/new` (farmer/admin)
-- `/orders/buyer`
-- `/orders/farmer` (farmer/admin)
-- `/orders/:id`
-- `/logistics/dispatch-board` (dispatcher/admin)
-- `/logistics/trip-planner` (dispatcher/admin)
-- `/logistics/shipment-tracking`
+- `/supply/distributor`
+- `/listings/new`
+- `/requests/new`
+- `/requests/mine`
+- `/requests/queue`
+- `/requests/:id`
+- `/distribution/board`
+- `/distribution/tracking`
+- `/distribution/planner`
+- `/admin/reports`
 - `/demand-board`
 - `/profile`
 
-Role checks are enforced in `ProtectedRoute` and route-level role arrays.
+Legacy redirects are preserved for compatibility:
 
-## 5.2 Dashboard Switching
+- `/orders/buyer` -> `/requests/mine`
+- `/orders/farmer` -> `/requests/queue`
+- `/orders/:id` -> `/requests/:id`
+- `/logistics/dispatch-board` -> `/distribution/board`
+- `/logistics/trip-planner` -> `/distribution/planner`
+- `/logistics/shipment-tracking` -> `/distribution/tracking`
+- `/listings/farmer` -> `/supply/distributor`
 
-`DashboardSwitch` routes users to role-specific dashboards:
+## 6. Admin Whole-System Report (New)
 
-- Admin -> `AdminDashboard`
-- Farmer -> `FarmerDashboard`
-- Dispatcher -> `DispatcherDashboard`
-- Buyer -> `BuyerDashboard`
+Frontend report center:
 
-## 5.3 API Integration Pattern
+- Route: `/admin/reports`
+- Page: `src/pages/admin/UnifiedReportsPage.jsx`
+- API aggregator: `src/api/reportApi.js`
 
-`src/api/axios.js` creates one API client:
+Data sources combined dynamically for one consolidated snapshot:
 
-- `baseURL = VITE_API_BASE_URL || http://127.0.0.1:8000/api`
-- Adds `Authorization: Bearer <token>` from localStorage when available
+- `/dashboard/summary/`
+- `/dashboard/activity/`
+- `/listings/`
+- `/orders/`
+- `/shipments/`
+- `/trips/`
+- `/demand-posts/`
+- `/products/`
+- `/locations/`
 
-Module APIs are split by domain:
+Export:
 
-- `authApi.js`
-- `catalogApi.js`
-- `dashboardApi.js`
-- `demandApi.js`
-- `listingsApi.js`
-- `ordersApi.js`
-- `logisticsApi.js`
+- Button: `Export Whole CSV`
+- Output file: `whole-system-report.csv`
 
-## 5.4 Demo Mode Auth (GitHub Pages)
+## 7. Backend API Surface (Current)
 
-`src/utils/demoAuth.js` enables demo-mode auth when:
-
-- `VITE_DEMO_MODE=true`, or
-- hostname ends with `github.io`
-
-Behavior:
-
-- Accepts known demo usernames with password `demo12345`
-- Stores demo user in localStorage
-- Clears access/refresh/demo user on logout helper
-
-This allows static frontend demos without live backend auth.
-
-## 5.5 UX/Interaction Features
-
-Implemented dynamic UX includes:
-
-- Command palette shortcut (`Ctrl/Cmd + K`)
-- Role-aware notification feed
-- Saved views with localStorage persistence
-- Auto-refresh hook with visibility-aware updates
-- Last-updated live timestamp display
-- Density mode toggle (cozy/compact)
-- Activity feed components
-- CSV export utility
-
-## 6. Backend Details
-
-## 6.1 Global API Configuration
-
-Django REST Framework defaults:
-
-- Authentication: JWT
-- Permission: IsAuthenticated by default
-
-JWT settings:
-
-- Access token lifetime: 60 minutes
-- Refresh token lifetime: 7 days
-
-CORS:
-
-- Reads `CORS_ALLOWED_ORIGINS`
-- Falls back to allow-all if no origins are set
-
-## 6.2 Users App (`apps.users`)
-
-### Model
-
-Custom `User` extends `AbstractUser` with:
-
-- `role`: ADMIN, FARMER, BUYER, DISPATCHER
-- `full_name`
-- `phone`
-- `created_at`
-
-### Auth Endpoints
+### Auth
 
 - `POST /api/auth/register/`
 - `POST /api/auth/login/`
 - `POST /api/auth/refresh/`
 - `GET /api/auth/me/`
 
-### Permissions
+v4 alias:
 
-Role-based permission classes are defined for farmer, buyer, and dispatcher actions.
+- `/api/v4/auth/*` (same handlers)
 
-### Demo Seeder
+### Dashboard
 
-Management command: `python manage.py seed_demo --reset`
+- `GET /api/dashboard/summary/`
+- `GET /api/dashboard/manager/overview/`
+- `GET /api/dashboard/distributor/overview/`
+- `GET /api/dashboard/farmer/overview/` (legacy alias)
+- `GET /api/dashboard/dispatcher/overview/` (legacy alias)
+- `GET/POST/DELETE /api/dashboard/activity/`
 
-- creates demo users
-- seeds products, locations, listings, orders, trips, shipments, and demand data
+v4 alias:
 
-## 6.3 Catalog App (`apps.catalog`)
+- `/api/v4/dashboard/*`
 
-Models:
+### Core Routers
 
-- `Category`
-- `Product` (FK to category)
+`/api/` exposes:
 
-Endpoints:
+- `locations`
+- `categories`
+- `products`
+- `listings`
+- `orders`
+- `requests` (alias of orders)
+- `vehicles`
+- `drivers`
+- `trips`
+- `shipments`
+- `deliveries` (alias of shipments)
+- `demand-posts`
+- `demand-offers`
 
-- `GET/POST /api/categories/`
-- `GET/POST /api/products/`
+`/api/v4/` exposes v4 router resources and explicit manager/delivery actions:
 
-## 6.4 Locations App (`apps.locations`)
+- `GET /api/v4/manager/approval-queue/`
+- `POST /api/v4/manager/requests/{id}/approve/`
+- `POST /api/v4/manager/requests/{id}/reject/`
+- `POST /api/v4/requests/{id}/confirm/`
+- `POST /api/v4/deliveries/assign/`
+- `PATCH /api/v4/deliveries/{id}/status/`
+- `POST /api/v4/deliveries/{id}/proof/`
 
-Model:
+## 8. Unified Request Workflow
 
-- `Location` (province, city/municipality, barangay, postal_code)
+Current order/request statuses:
 
-Endpoint:
+- `DRAFT`
+- `SUBMITTED`
+- `UNDER_REVIEW`
+- `APPROVED`
+- `REJECTED`
+- `IN_DELIVERY`
+- `DELIVERED`
+- `CONFIRMED`
 
-- `GET/POST /api/locations/` (+ search support)
+Transitions are enforced in `backend/apps/orders/services.py` and used by `orders`/`requests` view actions.
 
-## 6.5 Listings App (`apps.listings`)
+## 9. Logistics and POD
 
-Models:
-
-- `Listing` (farmer, product, quantity, unit_price, quality, dates, location, status)
-- `ListingImage` (multiple images per listing)
-
-Business rule:
-
-- `urgent_sale` flag auto-computed if listing is close to `available_until`
-
-Endpoints:
-
-- `GET/POST /api/listings/`
-- `GET /api/listings/farmer/mine/`
-- `POST /api/listings/{id}/clone/`
-- `GET /api/listings/{id}/sell-fast-suggestion/`
-
-## 6.6 Orders App (`apps.orders`)
-
-Models:
-
-- `Order` (buyer, listing, quantity, price snapshot, total, status, delivery fields)
-- `OrderStatusLog` (from/to status, changed_by, note, timestamp)
-
-Status flow (guarded transitions):
-
-- `PENDING -> CONFIRMED -> PACKED -> ASSIGNED -> IN_TRANSIT -> DELIVERED`
-- cancellation supported per transition rules
-
-Endpoints:
-
-- `GET/POST /api/orders/`
-- `GET /api/orders/my/`
-- `GET /api/orders/farmer/mine/`
-- `PATCH /api/orders/{id}/status/`
-- `GET /api/orders/{id}/timeline/`
-
-## 6.7 Logistics App (`apps.logistics`)
-
-Models:
+Primary logistics models:
 
 - `Vehicle`
 - `Driver`
-- `Trip` (dispatcher, vehicle, driver, schedule, status)
-- `Shipment` (one-to-one with order, optional trip assignment)
-- `DeliveryProof` (one-to-one with shipment, photo + receiver + notes)
+- `Trip`
+- `Shipment`
+- `DeliveryProof`
 
-Core behavior:
+Implemented operations include:
 
-- Assignment checks trip capacity before attaching shipment
-- Shipment status transitions are validated
-- Shipment status updates can synchronize related order status
+- Pending assignment queue
+- Capacity checks
+- Shipment assignment to trip
+- Shipment status progression
+- Proof-of-delivery upload
+- Synchronization of shipment status into request status where applicable
 
-Endpoints:
+## 10. Demand Board
 
-- `GET/POST /api/vehicles/`
-- `GET/POST /api/drivers/`
-- `GET/POST /api/trips/`
-- `GET/POST /api/shipments/`
-- `GET /api/shipments/pending-assignment/`
-- `POST /api/shipments/assign-shipment/`
-- `POST /api/shipments/capacity-check/`
-- `POST /api/shipments/consolidate/`
-- `PATCH /api/shipments/{id}/status/`
-- `POST /api/shipments/{id}/proof-of-delivery/`
+Demand board model set:
 
-## 6.8 Demand Board App (`apps.demand_board`)
+- `DemandPost`
+- `DemandOffer`
 
-Models:
+Current role behavior:
 
-- `DemandPost` (buyer, product, quantity, budget range, required date, location, status)
-- `DemandOffer` (farmer response with quantity and offered price)
+- Manager/Admin can create demand posts
+- Distributor/Admin can submit offers
 
-Endpoints:
+## 11. Demo Data
 
-- `GET/POST /api/demand-posts/`
-- `GET/POST /api/demand-offers/`
-- `POST /api/demand-posts/{id}/offers/`
-
-## 6.9 Dashboard App (`apps.dashboard`)
-
-Model:
-
-- `ActivityLog` (actor, role, module, action, message, metadata, created_at)
-
-Endpoints:
-
-- `GET /api/dashboard/summary/`
-- `GET /api/dashboard/farmer/overview/`
-- `GET /api/dashboard/dispatcher/overview/`
-- `GET/POST/DELETE /api/dashboard/activity/`
-
-## 7. Data Relationships
-
-```text
-User
-  - has many Listings (as farmer)
-  - has many Orders (as buyer)
-  - has many Trips (as dispatcher)
-  - has many DemandPosts (as buyer)
-
-Listing
-  - belongs to Product and Location
-  - has many ListingImages
-  - has many Orders
-
-Order
-  - belongs to Buyer and Listing
-  - has many OrderStatusLogs
-  - has one Shipment
-
-Shipment
-  - belongs to one Order
-  - optionally belongs to a Trip
-  - has one DeliveryProof
-
-DemandPost
-  - belongs to Buyer
-  - has many DemandOffers
-```
-
-## 8. Role-Based Workflows
-
-### Buyer
-
-1. Browse marketplace listings
-2. Create order
-3. Track order timeline
-4. Post demand entry and review farmer offers
-
-### Farmer
-
-1. Create and manage listings
-2. Receive buyer orders
-3. Update order status through farmer-owned stages
-4. Monitor listing urgency and relist when needed
-
-### Dispatcher
-
-1. Review pending shipments
-2. Create trip with vehicle and driver
-3. Assign shipments with capacity checks
-4. Advance shipment status and upload proof of delivery
-
-### Admin
-
-1. View global dashboards and metrics
-2. Access all role capabilities via role checks
-3. Manage records through APIs/admin tools
-
-## 9. Environment and Configuration
-
-### Frontend Environment
-
-- `VITE_API_BASE_URL` controls API base URL
-- `VITE_DEMO_MODE=true` forces demo mode
-
-### Backend Environment
-
-- `SECRET_KEY`
-- `DEBUG`
-- `ALLOWED_HOSTS` (comma-separated)
-- `CORS_ALLOWED_ORIGINS` (comma-separated)
-
-### Vite Base Path for Pages
-
-`vite.config.js` sets base dynamically in GitHub Actions using repo name, enabling proper asset paths on GitHub Pages.
-
-## 10. Setup, Run, and Commands
-
-## 10.1 Frontend (project root)
+Seed command:
 
 ```bash
-npm install
-npm run dev
-npm run build
-npm run lint
-npm run preview
+python manage.py seed_demo --reset
 ```
 
-Dev URL: `http://localhost:5173`
+Default demo password:
 
-## 10.2 Backend (`backend/`)
+- `demo12345`
+
+Current demo users:
+
+- `demo_admin`
+- `demo_manager_1`
+- `demo_manager_2`
+- `demo_distributor_1`
+- `demo_distributor_2`
+
+## 12. Local Run Commands
+
+### Backend
 
 ```bash
+cd backend
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
@@ -444,113 +255,36 @@ python manage.py seed_demo --reset
 python manage.py runserver
 ```
 
-API base URL: `http://127.0.0.1:8000/api/`
-
-## 10.3 Useful Backend Commands
+### Frontend
 
 ```bash
-python manage.py createsuperuser
-python manage.py test apps.orders apps.logistics
+npm install
+npm run dev
+npm run build
+npm run lint
 ```
 
-## 11. Testing Status
+## 13. Current Validation Baseline
 
-Automated tests are present for at least:
+Common validation commands used for this repo:
 
-- order permissions and status transitions (`apps.orders.tests`)
-- logistics assignment, transitions, and capacity checks (`apps.logistics.tests`)
+```bash
+cd backend
+python manage.py test
+python manage.py makemigrations --check --dry-run
 
-The system is still prototype-stage, so broader coverage (frontend tests, integration tests, load/security tests) is not yet complete.
-
-## 12. Deployment and Operations
-
-### Frontend CI/CD
-
-GitHub workflow `.github/workflows/deploy-pages.yml`:
-
-- install dependencies with `npm ci`
-- build with `npm run build`
-- upload `dist/`
-- deploy to GitHub Pages
-
-### Backend Deployment Readiness
-
-Not yet fully productionized in-repo. For production, add:
-
-- managed database (for example PostgreSQL)
-- stricter CORS and host settings
-- static/media strategy (for example object storage)
-- process manager and HTTPS reverse proxy
-- observability (error monitoring and logs)
-
-## 13. Demo Accounts
-
-Default password for all demo users: `demo12345`
-
-- `demo_admin`
-- `demo_farmer_1`
-- `demo_farmer_2`
-- `demo_buyer_1`
-- `demo_buyer_2`
-- `demo_dispatcher`
-
-See full table in `DEMO_ACCOUNTS.md`.
-
-## 14. Current Limitations and Next Improvements
-
-Known gaps for production readiness:
-
-- no production backend deployment pipeline in this repo
-- limited advanced business flows (disputes/ratings/traceability enhancements)
-- no websocket real-time events (polling-oriented frontend updates)
-- local media storage by default
-- security hardening and rate limiting can be expanded
-
-## 15. Quick API Index
-
-```text
-Auth
-- /api/auth/register/
-- /api/auth/login/
-- /api/auth/refresh/
-- /api/auth/me/
-
-Dashboard
-- /api/dashboard/summary/
-- /api/dashboard/farmer/overview/
-- /api/dashboard/dispatcher/overview/
-- /api/dashboard/activity/
-
-Core resources (router)
-- /api/locations/
-- /api/categories/
-- /api/products/
-- /api/listings/
-- /api/orders/
-- /api/vehicles/
-- /api/drivers/
-- /api/trips/
-- /api/shipments/
-- /api/demand-posts/
-- /api/demand-offers/
-
-Custom actions
-- /api/listings/farmer/mine/
-- /api/listings/{id}/clone/
-- /api/listings/{id}/sell-fast-suggestion/
-- /api/orders/my/
-- /api/orders/farmer/mine/
-- /api/orders/{id}/status/
-- /api/orders/{id}/timeline/
-- /api/shipments/pending-assignment/
-- /api/shipments/assign-shipment/
-- /api/shipments/capacity-check/
-- /api/shipments/consolidate/
-- /api/shipments/{id}/status/
-- /api/shipments/{id}/proof-of-delivery/
-- /api/demand-posts/{id}/offers/
+cd ..
+npm run lint
+npm run build
 ```
 
----
+## 14. Canonical v4 Reference Docs
 
-This document is intended as a comprehensive technical baseline for onboarding, handoff, and extension planning of Agriculture Distribution System v3.
+For v4 policy and migration references, use:
+
+- `docs/V4_SYSTEM_OVERVIEW.md`
+- `docs/V4_ROLE_MATRIX.md`
+- `docs/V4_WORKFLOW_STATE_MACHINE.md`
+- `docs/V4_API_CONTRACT.md`
+- `docs/V4_MIGRATION_MAP_FROM_V3.md`
+- `docs/V4_GLOSSARY.md`

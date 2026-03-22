@@ -51,11 +51,19 @@ function ProfilePage({ user }) {
         title="Profile"
         subtitle="Your account identity and active system role."
       />
+      <section className="card module-hero">
+        <div>
+          <p className="module-kicker">Operator Profile</p>
+          <h3>Manage identity, preferences, and activity context</h3>
+          <p>Keep your workspace settings aligned with your operational responsibilities.</p>
+        </div>
+        <span className="highlight-metric">{entries.length} activity events</span>
+      </section>
       <article className="card profile-cover">
         <img src={heroImage} alt="Profile cover" loading="lazy" />
         <div className="profile-avatar">{initials}</div>
       </article>
-      <div className="grid">
+      <div className="grid module-list">
         <article className="card">
           <strong>Live Edit Preview</strong>
           <form className="inline-form profile-form">

@@ -94,8 +94,17 @@ function TripPlannerPage() {
   return (
     <section className={`panel ${isCreatingTrip || isCheckingCapacity ? 'pending-row' : ''}`}>
       <PageHeader icon={Route} title="Trip Planner" subtitle="Create trips and pre-check vehicle capacity against pending loads." />
+      <section className="card module-hero">
+        <div>
+          <p className="module-kicker">Route Engineering</p>
+          <h3>Build trips with capacity confidence</h3>
+          <p>Pair vehicles and drivers, run capacity checks, and launch schedule-ready routes.</p>
+        </div>
+        <span className="highlight-metric">{trips.length} total trips</span>
+      </section>
       {isCreatingTrip || isCheckingCapacity ? <p className="sync-text">Syncing...</p> : null}
 
+      <section className="card module-block">
       <form className="inline-form" onSubmit={onCreateTrip}>
         <select name="vehicle" value={form.vehicle} onChange={onChange} required>
           <option value="">Select vehicle</option>
@@ -121,18 +130,21 @@ function TripPlannerPage() {
           {isCreatingTrip ? 'Creating...' : 'Create Trip'}
         </button>
       </form>
+      </section>
 
       {capacityResult === true ? <Toast message="Capacity check: PASS" type="success" /> : null}
       {capacityResult === false ? <ErrorState message="Capacity check: EXCEEDED" /> : null}
       <Toast message={message} type="success" />
       {error ? <ErrorState message={error} /> : null}
 
+      <section className="card module-block module-list">
       <h3>Existing Trips</h3>
       <ul className="list">
         {trips.map((trip) => (
           <li key={trip.id}>Trip #{trip.id} vehicle #{trip.vehicle} driver #{trip.driver} status {trip.status}</li>
         ))}
       </ul>
+      </section>
     </section>
   )
 }

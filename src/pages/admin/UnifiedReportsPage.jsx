@@ -92,6 +92,18 @@ function UnifiedReportsPage() {
         subtitle="Dynamic all-in-one reporting connected to listings, requests, logistics, demand, and dashboard activity."
       />
 
+      <section className="report-hero card">
+        <div>
+          <p className="report-kicker">Centralized Intelligence</p>
+          <h3>Generate a full system snapshot in one place</h3>
+          <p>Pull current totals and operational records across marketplace, requests, logistics, demand, and activity.</p>
+        </div>
+        <div className="report-hero-meta">
+          <span className="signal-chip safe">Live Data Sync</span>
+          <span className="signal-chip neutral">Export Ready</span>
+        </div>
+      </section>
+
       <div className="chip-row">
         <button type="button" className="chip active" onClick={loadReport}>
           Generate Report Now
@@ -114,19 +126,21 @@ function UnifiedReportsPage() {
 
       {!loading && !error && report ? (
         <>
-          <div className="stats-grid">
-            <article className="card"><strong>Listings</strong><p>{report.totals.listings}</p></article>
-            <article className="card"><strong>Requests</strong><p>{report.totals.orders}</p></article>
-            <article className="card"><strong>Shipments</strong><p>{report.totals.shipments}</p></article>
-            <article className="card"><strong>Trips</strong><p>{report.totals.trips}</p></article>
-            <article className="card"><strong>Demand Posts</strong><p>{report.totals.demand_posts}</p></article>
-            <article className="card"><strong>Activity Events</strong><p>{report.activity.length}</p></article>
+          <div className="stats-grid report-kpi-grid">
+            <article className="card report-kpi-card"><strong>Listings</strong><p>{report.totals.listings}</p></article>
+            <article className="card report-kpi-card"><strong>Requests</strong><p>{report.totals.orders}</p></article>
+            <article className="card report-kpi-card"><strong>Shipments</strong><p>{report.totals.shipments}</p></article>
+            <article className="card report-kpi-card"><strong>Trips</strong><p>{report.totals.trips}</p></article>
+            <article className="card report-kpi-card"><strong>Demand Posts</strong><p>{report.totals.demand_posts}</p></article>
+            <article className="card report-kpi-card"><strong>Activity Events</strong><p>{report.activity.length}</p></article>
           </div>
 
-          <section className="card">
+          <section className="card report-meta-card">
             <h3>Report Metadata</h3>
-            <p>Generated at: {new Date(report.generatedAt).toLocaleString()}</p>
-            <p>Rows prepared for export: {reportRows.length}</p>
+            <div className="chip-row">
+              <span className="signal-chip safe">Generated at: {new Date(report.generatedAt).toLocaleString()}</span>
+              <span className="signal-chip warning">Rows prepared for export: {reportRows.length}</span>
+            </div>
           </section>
         </>
       ) : null}

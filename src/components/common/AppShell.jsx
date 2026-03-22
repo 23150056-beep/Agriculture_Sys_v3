@@ -65,7 +65,7 @@ function AppShell({ user, children }) {
       />
       <div className="shell">
         <Sidebar user={user} />
-        <main>{children}</main>
+        <main className="app-main">{children}</main>
       </div>
       <MobileBottomNav user={user} />
       <CommandPalette

@@ -176,6 +176,14 @@ function FarmerOrdersPage() {
         title="Manager Approval Queue"
         subtitle="Review and update status transitions for queued requests."
       />
+      <section className="card module-hero">
+        <div>
+          <p className="module-kicker">Approval Operations</p>
+          <h3>Execute queue decisions with bulk controls</h3>
+          <p>Filter requests, run fast status actions, and keep transitions compliant with workflow rules.</p>
+        </div>
+        <span className="highlight-metric">{filteredOrders.length} queue items</span>
+      </section>
       <DynamicAutoRefreshBadge
         active={isActive}
         seconds={60}
@@ -185,6 +193,7 @@ function FarmerOrdersPage() {
       />
       <Toast message={message} type="success" />
       {error ? <ErrorState message={error} /> : null}
+      <section className="card module-block">
       <FilterBar>
         <input
           placeholder="Search queued requests"
@@ -240,8 +249,9 @@ function FarmerOrdersPage() {
           <button type="button" className="chip" onClick={() => setSelectedOrderIds([])} disabled={bulkUpdating || !selectedOrderIds.length}>Clear</button>
         </div>
       </FilterBar>
+      </section>
       {loading ? <SkeletonLoader lines={4} variant="table" /> : null}
-      <div className="desktop-list">
+      <div className="desktop-list card module-block module-list">
         <DataTable
           rowKey="id"
           rows={filteredOrders}

@@ -112,9 +112,18 @@ function ShipmentTrackingPage() {
   return (
     <section className="panel">
       <PageHeader icon={MapPinned} title="Shipment Tracking" subtitle="Track shipment statuses and upload proof of delivery." />
+      <section className="card module-hero">
+        <div>
+          <p className="module-kicker">Delivery Visibility</p>
+          <h3>Track shipment execution and POD completion</h3>
+          <p>Filter live movement statuses, flag risk, and submit proof-of-delivery from one stream.</p>
+        </div>
+        <span className="highlight-metric">{filteredShipments.length} shipments visible</span>
+      </section>
       <Toast message={message} type="success" />
       {error ? <ErrorState message={error} /> : null}
 
+      <section className="card module-block">
       <FilterBar>
         <input
           placeholder="Search shipment by id, order, or status"
@@ -152,8 +161,9 @@ function ShipmentTrackingPage() {
           }))}
         />
       </FilterBar>
+      </section>
 
-      <ul className="list">
+      <ul className="list card module-block module-list">
         {filteredShipments.map((shipment) => (
           <li key={shipment.id} className={`card ${updatingShipmentId === shipment.id || podSubmittingShipmentId === shipment.id ? 'pending-row' : ''}`}>
             <div className="list-row">

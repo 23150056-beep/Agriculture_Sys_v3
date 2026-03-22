@@ -99,10 +99,19 @@ function DispatchBoardPage() {
   return (
     <section className="panel">
       <PageHeader icon={ListChecks} title="Distribution Board" subtitle="Assign pending shipments and update shipment movement status." />
+      <section className="card module-hero">
+        <div>
+          <p className="module-kicker">Distribution Control</p>
+          <h3>Dispatch, route, and status updates in one board</h3>
+          <p>Assign pending shipments to trips and keep movement statuses synchronized.</p>
+        </div>
+        <span className="highlight-metric">{pendingShipments.length} pending assignments</span>
+      </section>
 
       <Toast message={message} type="success" />
       {error ? <ErrorState message={error} /> : null}
 
+      <section className="card module-block">
       <h3>Pending Assignment</h3>
       <ul className="list">
         {pendingShipments.map((shipment) => (
@@ -124,7 +133,9 @@ function DispatchBoardPage() {
           </li>
         ))}
       </ul>
+      </section>
 
+      <section className="card module-block module-list">
       <h3>All Shipments</h3>
       <ul className="list">
         {shipments.map((shipment) => (
@@ -148,6 +159,7 @@ function DispatchBoardPage() {
           </li>
         ))}
       </ul>
+      </section>
     </section>
   )
 }

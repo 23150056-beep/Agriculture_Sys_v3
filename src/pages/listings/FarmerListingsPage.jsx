@@ -103,6 +103,15 @@ function FarmerListingsPage() {
         title="My Listings"
         subtitle="Monitor your current produce inventory and availability."
       />
+      <section className="card module-hero">
+        <div>
+          <p className="module-kicker">Inventory Console</p>
+          <h3>Manage listing freshness and price updates</h3>
+          <p>Run quick edits on quantity, status, and pricing without leaving the board.</p>
+        </div>
+        <span className="highlight-metric">{filteredListings.length} visible listings</span>
+      </section>
+      <section className="card module-block">
       <FilterBar>
         <input
           placeholder="Search my listings"
@@ -110,9 +119,10 @@ function FarmerListingsPage() {
           onChange={(event) => setQuery(event.target.value)}
         />
       </FilterBar>
+      </section>
       <Toast message={message} type="success" />
       {error ? <ErrorState message={error} /> : null}
-      <div className="desktop-list">
+      <div className="desktop-list card module-block module-list">
         <DataTable
           rowKey="id"
           rows={filteredListings}

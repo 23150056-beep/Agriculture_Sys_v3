@@ -23,11 +23,20 @@ function OrderDetailsPage() {
         title={`Request Timeline #${id}`}
         subtitle="Trace every status transition for this request."
       />
+      <section className="card module-hero">
+        <div>
+          <p className="module-kicker">Audit Trail</p>
+          <h3>Complete lifecycle visibility for this request</h3>
+          <p>Follow each transition event in chronological order with current state highlighted.</p>
+        </div>
+      </section>
+      <section className="card module-block">
       <ProgressStepper
         steps={ORDER_STATUSES}
         current={timeline.length ? timeline[timeline.length - 1].to_status : ORDER_STATUSES[0]}
       />
       {timeline.length > 0 ? <Timeline items={timeline} /> : <EmptyState title="No timeline events" description="No status changes recorded for this request yet." />}
+      </section>
     </section>
   )
 }

@@ -154,6 +154,14 @@ function BuyerOrdersPage() {
         title="Distributor Requests"
         subtitle="Create and monitor distribution requests from marketplace supply."
       />
+      <section className="card module-hero">
+        <div>
+          <p className="module-kicker">Request Pipeline</p>
+          <h3>Submit and track fulfillment across every stage</h3>
+          <p>Launch new requests and monitor readiness signals from submission through delivery.</p>
+        </div>
+        <span className="highlight-metric">{filteredOrders.length} visible requests</span>
+      </section>
       <DynamicAutoRefreshBadge
         active={isActive}
         seconds={60}
@@ -162,6 +170,7 @@ function BuyerOrdersPage() {
         onRefresh={refreshNow}
       />
 
+      <section className="card module-block">
       <p className="section-label">Create New Request</p>
 
       <form className="inline-form" onSubmit={onSubmit}>
@@ -185,10 +194,12 @@ function BuyerOrdersPage() {
         <input name="expected_delivery_date" type="date" value={form.expected_delivery_date} onChange={onChange} required />
         <button type="submit">Create Request</button>
       </form>
+      </section>
 
       <Toast message={message} type="success" />
       {error ? <ErrorState message={error} /> : null}
 
+      <section className="card module-block">
       <p className="section-label">Request History</p>
       <FilterBar>
         <input
@@ -234,8 +245,9 @@ function BuyerOrdersPage() {
           }))}
         />
       </FilterBar>
+      </section>
       {loading ? <SkeletonLoader lines={4} variant="table" /> : null}
-      <div className="desktop-list">
+      <div className="desktop-list card module-block module-list">
         <DataTable
           rowKey="id"
           rows={filteredOrders}

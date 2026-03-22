@@ -49,6 +49,7 @@ function LoginPage() {
       <div className="auth-visual">
         <img src={heroImage} alt="Agriculture platform" loading="lazy" />
       </div>
+      <p className="auth-chip">FarmVista Access</p>
       <h1 className="auth-title"><LogIn size={19} /> Login</h1>
       <p className="auth-subtitle">Access your dashboard, operations, and marketplace modules.</p>
       <form onSubmit={onSubmit}>

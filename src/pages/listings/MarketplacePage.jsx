@@ -81,6 +81,14 @@ function MarketplacePage() {
         title="Marketplace Listings"
         subtitle="Browse available produce, pricing, and urgency signals."
       />
+      <section className="card module-hero">
+        <div>
+          <p className="module-kicker">Market Pulse</p>
+          <h3>Live marketplace feed for active supply</h3>
+          <p>Filter urgent inventory, inspect listing details, and export a clean market snapshot.</p>
+        </div>
+        <span className="highlight-metric">{filteredListings.length} active listings</span>
+      </section>
       <DynamicAutoRefreshBadge
         active={isActive}
         seconds={45}
@@ -88,6 +96,7 @@ function MarketplacePage() {
         onToggle={() => setIsActive((prev) => !prev)}
         onRefresh={refreshNow}
       />
+      <section className="card module-block">
       <FilterBar>
         <input
           placeholder="Search by product or status"
@@ -131,8 +140,9 @@ function MarketplacePage() {
           }))}
         />
       </FilterBar>
+      </section>
       {loading ? <SkeletonLoader lines={4} variant="table" /> : null}
-      <div className="desktop-list">
+      <div className="desktop-list card module-block module-list">
         <DataTable
           rowKey="id"
           rows={filteredListings}
@@ -168,7 +178,7 @@ function MarketplacePage() {
           ]}
         />
       </div>
-      <div className="mobile-card-list">
+      <div className="mobile-card-list module-list">
         {filteredListings.map((item) => (
           <ImageCard
             key={item.id}

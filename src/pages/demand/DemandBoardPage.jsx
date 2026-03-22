@@ -133,6 +133,14 @@ function DemandBoardPage({ user }) {
         title="Demand Board"
         subtitle="Post planning requirements so distributors can respond quickly."
       />
+      <section className="card module-hero">
+        <div>
+          <p className="module-kicker">Demand Intelligence</p>
+          <h3>Plan requirements and evaluate supply match</h3>
+          <p>Create and monitor demand posts with list and kanban perspectives plus match score indicators.</p>
+        </div>
+        <span className="highlight-metric">{filteredPosts.length} filtered posts</span>
+      </section>
       <DynamicAutoRefreshBadge
         active={isActive}
         seconds={60}
@@ -142,6 +150,7 @@ function DemandBoardPage({ user }) {
       />
       {canCreateDemand ? (
         <>
+          <section className="card module-block">
           <p className="section-label">Post Demand</p>
           <form className="inline-form" onSubmit={onSubmit}>
             <select name="product" value={form.product} onChange={onChange} required>
@@ -164,10 +173,12 @@ function DemandBoardPage({ user }) {
             </select>
             <button type="submit">Create Demand</button>
           </form>
+          </section>
         </>
       ) : <p className="section-label">Demand posting is manager-only in v4. You can review open plans below.</p>}
       <Toast message={message} type="success" />
       {error ? <ErrorState message={error} /> : null}
+      <section className="card module-block">
       <p className="section-label">Active Demand Posts</p>
       <FilterBar>
         <input
@@ -221,10 +232,11 @@ function DemandBoardPage({ user }) {
           }))}
         />
       </FilterBar>
+      </section>
       {loading ? <SkeletonLoader variant="table" lines={4} /> : null}
       {posts.length === 0 ? <EmptyIllustrationState imageSrc={heroImage} title="No demand posts yet" description="Create your first demand post above." /> : null}
       {viewMode === 'list' ? (
-        <ul className="list desktop-list">
+        <ul className="list desktop-list card module-block module-list">
           {filteredPosts.map((post) => (
             <li key={post.id} className="list-row">
               <span>
@@ -239,7 +251,7 @@ function DemandBoardPage({ user }) {
           ))}
         </ul>
       ) : (
-        <div className="kanban-board">
+        <div className="kanban-board card module-block module-list">
           {statuses.filter((item) => item !== 'ALL').map((status) => (
             <section key={status} className="card kanban-col">
               <h3>{status}</h3>

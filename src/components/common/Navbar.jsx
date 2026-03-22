@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, PackageSearch, ShoppingBag, Truck, UserRound } from 'lucide-react'
 import { ROLES } from '../../utils/constants'
 import { clearStoredAuth } from '../../utils/demoAuth'
@@ -10,6 +10,7 @@ import NotificationCenter from '../dynamic/NotificationCenter'
 function Navbar({ user, onOpenPalette, densityMode, onChangeDensity }) {
   const navigate = useNavigate()
   const { items: notifications, refresh } = useNotificationFeed(user)
+  const navClass = ({ isActive }) => `nav-item${isActive ? ' active' : ''}`
 
   const onLogout = () => {
     clearStoredAuth()
@@ -21,17 +22,18 @@ function Navbar({ user, onOpenPalette, densityMode, onChangeDensity }) {
     <header className="top-nav">
       <Link to="/" className="brand brand-wrap">
         <LayoutDashboard size={18} />
-        <span>Agri Distribution</span>
+        <span>FarmVista</span>
       </Link>
       <nav>
-        <Link to="/marketplace" className="nav-item"><PackageSearch size={16} />Marketplace</Link>
-        {user?.role === ROLES.DISTRIBUTOR || user?.role === ROLES.ADMIN ? <Link to="/requests/mine" className="nav-item"><ShoppingBag size={16} />My Requests</Link> : null}
-        {user?.role === ROLES.MANAGER || user?.role === ROLES.ADMIN ? <Link to="/requests/queue" className="nav-item"><ShoppingBag size={16} />Queue</Link> : null}
-        {(user?.role === ROLES.MANAGER || user?.role === ROLES.DISTRIBUTOR || user?.role === ROLES.ADMIN) ? <Link to="/demand-board" className="nav-item"><LayoutDashboard size={16} />Demand Board</Link> : null}
-        {user?.role === ROLES.MANAGER || user?.role === ROLES.ADMIN ? <Link to="/distribution/board" className="nav-item"><Truck size={16} />Distribution</Link> : null}
-        <Link to="/profile" className="nav-item"><UserRound size={16} />Profile</Link>
+        <NavLink to="/marketplace" className={navClass}><PackageSearch size={16} />Marketplace</NavLink>
+        {user?.role === ROLES.DISTRIBUTOR || user?.role === ROLES.ADMIN ? <NavLink to="/requests/mine" className={navClass}><ShoppingBag size={16} />My Requests</NavLink> : null}
+        {user?.role === ROLES.MANAGER || user?.role === ROLES.ADMIN ? <NavLink to="/requests/queue" className={navClass}><ShoppingBag size={16} />Queue</NavLink> : null}
+        {(user?.role === ROLES.MANAGER || user?.role === ROLES.DISTRIBUTOR || user?.role === ROLES.ADMIN) ? <NavLink to="/demand-board" className={navClass}><LayoutDashboard size={16} />Demand Board</NavLink> : null}
+        {user?.role === ROLES.MANAGER || user?.role === ROLES.ADMIN ? <NavLink to="/distribution/board" className={navClass}><Truck size={16} />Distribution</NavLink> : null}
+        <NavLink to="/profile" className={navClass}><UserRound size={16} />Profile</NavLink>
       </nav>
       <div className="user-meta">
+        <p className="user-meta-label">Live Operations</p>
         <DensityToggle mode={densityMode} onChange={onChangeDensity} />
         <KeyboardShortcuts onOpenPalette={onOpenPalette} />
         <NotificationCenter

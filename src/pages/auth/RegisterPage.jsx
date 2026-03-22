@@ -35,6 +35,7 @@ function RegisterPage() {
       <div className="auth-visual">
         <img src={heroImage} alt="Agriculture platform" loading="lazy" />
       </div>
+      <p className="auth-chip">FarmVista Access</p>
       <h1 className="auth-title"><UserPlus size={19} /> Register</h1>
       <p className="auth-subtitle">Create an account with your role to access module-specific workflows.</p>
       <form onSubmit={onSubmit}>

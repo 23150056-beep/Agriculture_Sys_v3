@@ -85,6 +85,14 @@ function ListingFormPage() {
         title="Create Listing"
         subtitle="Publish produce with quantity, quality, and location details."
       />
+      <section className="card module-hero">
+        <div>
+          <p className="module-kicker">Supply Publishing</p>
+          <h3>Post new inventory with market-ready metadata</h3>
+          <p>Capture product, quality, timing, and location so managers can process requests faster.</p>
+        </div>
+      </section>
+      <section className="card module-block">
       <p className="section-label">Listing Information</p>
       <form className="inline-form" onSubmit={onSubmit}>
         <select name="product" value={form.product} onChange={onChange} required>
@@ -128,6 +136,7 @@ function ListingFormPage() {
 
         <button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Create Listing'}</button>
       </form>
+      </section>
       <Toast message={message} type="success" />
       {error ? <ErrorState message={error} /> : null}
     </section>
