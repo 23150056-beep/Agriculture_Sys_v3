@@ -17,20 +17,20 @@ User = get_user_model()
 
 class LogisticsApiTests(APITestCase):
     def setUp(self):
-        self.dispatcher = User.objects.create_user(
-            username="dispatcher_test",
+        self.manager = User.objects.create_user(
+            username="manager_test",
             password="test12345",
-            role="DISPATCHER",
+            role="MANAGER",
         )
-        self.farmer = User.objects.create_user(
-            username="farmer_test",
+        self.distributor = User.objects.create_user(
+            username="distributor_test",
             password="test12345",
-            role="FARMER",
+            role="DISTRIBUTOR",
         )
-        self.buyer = User.objects.create_user(
-            username="buyer_test",
+        self.requester = User.objects.create_user(
+            username="requester_test",
             password="test12345",
-            role="BUYER",
+            role="MANAGER",
         )
 
         category = Category.objects.create(name="Test Category")
@@ -43,7 +43,7 @@ class LogisticsApiTests(APITestCase):
         )
 
         listing = Listing.objects.create(
-            farmer=self.farmer,
+            farmer=self.distributor,
             product=product,
             quantity_available=Decimal("100.00"),
             unit_price=Decimal("20.00"),
@@ -57,12 +57,12 @@ class LogisticsApiTests(APITestCase):
         )
 
         self.order = Order.objects.create(
-            buyer=self.buyer,
+            buyer=self.requester,
             listing=listing,
             quantity=Decimal("5.00"),
             unit_price_snapshot=Decimal("20.00"),
             total_price=Decimal("100.00"),
-            status="ASSIGNED",
+            status="APPROVED",
             delivery_location=self.location,
             expected_delivery_date=timezone.localdate() + timedelta(days=3),
         )
@@ -85,7 +85,7 @@ class LogisticsApiTests(APITestCase):
             is_active=True,
         )
 
-        self.client.force_authenticate(user=self.dispatcher)
+        self.client.force_authenticate(user=self.manager)
 
     def test_trip_create_rejects_inactive_vehicle(self):
         inactive_vehicle = Vehicle.objects.create(
@@ -145,11 +145,11 @@ class LogisticsApiTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.order.refresh_from_db()
-        self.assertEqual(self.order.status, "IN_TRANSIT")
+        self.assertEqual(self.order.status, "IN_DELIVERY")
 
     def test_assign_requires_pending_shipment(self):
         trip = Trip.objects.create(
-            dispatcher=self.dispatcher,
+            dispatcher=self.manager,
             vehicle=self.active_vehicle,
             driver=self.active_driver,
             scheduled_date=timezone.localdate() + timedelta(days=1),
@@ -174,7 +174,7 @@ class LogisticsApiTests(APITestCase):
             is_active=True,
         )
         trip = Trip.objects.create(
-            dispatcher=self.dispatcher,
+            dispatcher=self.manager,
             vehicle=small_vehicle,
             driver=self.active_driver,
             scheduled_date=timezone.localdate() + timedelta(days=1),
@@ -191,7 +191,7 @@ class LogisticsApiTests(APITestCase):
 
     def test_assign_succeeds_when_trip_capacity_allows(self):
         trip = Trip.objects.create(
-            dispatcher=self.dispatcher,
+            dispatcher=self.manager,
             vehicle=self.active_vehicle,
             driver=self.active_driver,
             scheduled_date=timezone.localdate() + timedelta(days=1),

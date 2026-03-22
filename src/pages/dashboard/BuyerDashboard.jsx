@@ -21,7 +21,7 @@ function BuyerDashboard() {
   const [error, setError] = useState('')
   const { entries: activityEntries } = useActivityLog()
 
-  const statuses = ['PENDING', 'CONFIRMED', 'IN_TRANSIT', 'DELIVERED']
+  const statuses = ['SUBMITTED', 'UNDER_REVIEW', 'IN_DELIVERY', 'DELIVERED']
   const chartPoints = useMemo(() => {
     if (!totals) return [0, 0, 0, 0]
     const base = totals.orders || 0
@@ -50,13 +50,13 @@ function BuyerDashboard() {
     <div className="panel">
       <PageHeader
         icon={ShoppingCart}
-        title="Buyer Dashboard"
-        subtitle="Monitor orders and sourcing opportunities."
+        title="Manager Dashboard"
+        subtitle="Monitor requests, approvals, and distribution operations."
       />
       <HeroBanner
         imageSrc={heroImage}
-        title="Buyer Command Center"
-        subtitle="Track demand, place orders, and monitor delivery progress from one view."
+        title="Manager Command Center"
+        subtitle="Review incoming requests, approve operations, and monitor delivery progress."
       >
         <AutoRefreshBadge seconds={60} active />
       </HeroBanner>
@@ -70,17 +70,17 @@ function BuyerDashboard() {
             <KpiCard label="Demand Posts" value={totals.demand_posts} trend={4} />
           </div>
           <DrilldownChartCard
-            title="Order Pipeline"
-            summary="Click a status to open buyer orders filtered to that stage."
+            title="Request Pipeline"
+            summary="Click a status to open the manager queue filtered to that stage."
             points={chartPoints}
             range="Current"
             labels={statuses}
-            onPointSelect={(_, label) => navigate(`/orders/buyer?status=${encodeURIComponent(label)}`)}
+            onPointSelect={(_, label) => navigate(`/requests/queue?status=${encodeURIComponent(label)}`)}
           />
-          <ActivityPanel items={activityEntries} title="Buyer Activity" />
+          <ActivityPanel items={activityEntries} title="Manager Activity" />
         </>
       ) : null}
-      {!isLoading && !error && !totals ? <EmptyState title="No buyer metrics yet" description="Metrics appear once data is available." /> : null}
+      {!isLoading && !error && !totals ? <EmptyState title="No manager metrics yet" description="Metrics appear once data is available." /> : null}
     </div>
   )
 }

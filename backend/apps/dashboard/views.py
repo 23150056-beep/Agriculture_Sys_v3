@@ -28,7 +28,7 @@ class SummaryView(APIView):
         )
 
 
-class FarmerOverviewView(APIView):
+class DistributorOverviewView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
@@ -44,6 +44,14 @@ class DispatcherOverviewView(APIView):
         trips = Trip.objects.filter(dispatcher=request.user).count()
         pending_shipments = Shipment.objects.filter(status="PENDING_ASSIGNMENT").count()
         return Response({"my_trips": trips, "pending_assignment": pending_shipments})
+
+
+class ManagerOverviewView(DispatcherOverviewView):
+    pass
+
+
+class FarmerOverviewView(DistributorOverviewView):
+    pass
 
 
 class ActivityLogView(APIView):

@@ -1,7 +1,7 @@
 from rest_framework import decorators, permissions, response, status, viewsets
 
 from apps.dashboard.services import log_activity
-from apps.users.permissions import IsDispatcher
+from apps.users.permissions import IsManager
 
 from .models import DeliveryProof, Driver, Shipment, Trip, Vehicle
 from .serializers import (
@@ -32,7 +32,7 @@ class TripViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ["create", "update", "partial_update", "destroy"]:
-            return [permissions.IsAuthenticated(), IsDispatcher()]
+            return [permissions.IsAuthenticated(), IsManager()]
         return [permissions.IsAuthenticated()]
 
     def perform_create(self, serializer):
@@ -45,7 +45,7 @@ class ShipmentViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ["assign", "capacity_check", "consolidate", "update_status", "proof_of_delivery"]:
-            return [permissions.IsAuthenticated(), IsDispatcher()]
+            return [permissions.IsAuthenticated(), IsManager()]
         return [permissions.IsAuthenticated()]
 
     @decorators.action(detail=False, methods=["get"], url_path="pending-assignment")
@@ -81,6 +81,10 @@ class ShipmentViewSet(viewsets.ModelViewSet):
         )
         return response.Response(self.get_serializer(shipment).data)
 
+    @decorators.action(detail=False, methods=["post"], url_path="assign")
+    def assign_v4(self, request):
+        return self.assign(request)
+
     @decorators.action(detail=False, methods=["post"], url_path="capacity-check")
     def capacity_check(self, request):
         vehicle_id = request.data.get("vehicle_id")
@@ -106,7 +110,7 @@ class ShipmentViewSet(viewsets.ModelViewSet):
             return response.Response({"detail": "invalid status transition"}, status=status.HTTP_400_BAD_REQUEST)
         shipment.status = next_status
         if next_status == "IN_TRANSIT":
-            shipment.order.status = "IN_TRANSIT"
+            shipment.order.status = "IN_DELIVERY"
             shipment.order.save(update_fields=["status", "updated_at"])
         if next_status == "DELIVERED":
             shipment.order.status = "DELIVERED"
@@ -144,3 +148,7 @@ class ShipmentViewSet(viewsets.ModelViewSet):
             metadata={"shipment_id": shipment.id, "pod_id": pod.id},
         )
         return response.Response(DeliveryProofSerializer(pod).data, status=status.HTTP_201_CREATED)
+
+    @decorators.action(detail=True, methods=["post"], url_path="proof")
+    def proof_v4(self, request, pk=None):
+        return self.proof_of_delivery(request, pk=pk)

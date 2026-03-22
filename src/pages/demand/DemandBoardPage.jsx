@@ -20,8 +20,9 @@ import { addActivityLog } from '../../utils/activityLog'
 import { getDemandListingMatch } from '../../utils/prototypeSignals'
 import useAutoRefresh from '../../hooks/useAutoRefresh'
 import useSavedViews from '../../hooks/useSavedViews'
+import { ROLES } from '../../utils/constants'
 
-function DemandBoardPage() {
+function DemandBoardPage({ user }) {
   const [posts, setPosts] = useState([])
   const [listings, setListings] = useState([])
   const [query, setQuery] = useState('')
@@ -112,7 +113,7 @@ function DemandBoardPage() {
       addActivityLog({ title: `Demand post created for product #${form.product || '-'} with target qty ${form.target_quantity}` })
       loadData()
     } catch {
-      setError('Failed to create demand post. Buyer role is required.')
+      setError('Failed to create demand post. Manager role is required.')
     }
   }
 
@@ -123,13 +124,14 @@ function DemandBoardPage() {
   })
 
   const statuses = ['ALL', ...new Set(posts.map((post) => post.status))]
+  const canCreateDemand = user?.role === ROLES.MANAGER || user?.role === ROLES.ADMIN
 
   return (
     <section className="panel">
       <PageHeader
         icon={Megaphone}
         title="Demand Board"
-        subtitle="Post buying requirements so farmers can respond quickly."
+        subtitle="Post planning requirements so distributors can respond quickly."
       />
       <DynamicAutoRefreshBadge
         active={isActive}
@@ -138,28 +140,32 @@ function DemandBoardPage() {
         onToggle={() => setIsActive((prev) => !prev)}
         onRefresh={refreshNow}
       />
-      <p className="section-label">Post Demand</p>
-      <form className="inline-form" onSubmit={onSubmit}>
-        <select name="product" value={form.product} onChange={onChange} required>
-          <option value="">Select product</option>
-          {products.map((item) => (
-            <option key={item.id} value={item.id}>{item.name}</option>
-          ))}
-        </select>
-        <input name="target_quantity" type="number" min="1" step="0.01" value={form.target_quantity} onChange={onChange} required />
-        <input name="budget_min" type="number" min="1" step="0.01" value={form.budget_min} onChange={onChange} required />
-        <input name="budget_max" type="number" min="1" step="0.01" value={form.budget_max} onChange={onChange} required />
-        <input name="required_by_date" type="date" value={form.required_by_date} onChange={onChange} required />
-        <select name="location" value={form.location} onChange={onChange} required>
-          <option value="">Select location</option>
-          {locations.map((location) => (
-            <option key={location.id} value={location.id}>
-              {location.barangay}, {location.city_municipality}, {location.province}
-            </option>
-          ))}
-        </select>
-        <button type="submit">Create Demand</button>
-      </form>
+      {canCreateDemand ? (
+        <>
+          <p className="section-label">Post Demand</p>
+          <form className="inline-form" onSubmit={onSubmit}>
+            <select name="product" value={form.product} onChange={onChange} required>
+              <option value="">Select product</option>
+              {products.map((item) => (
+                <option key={item.id} value={item.id}>{item.name}</option>
+              ))}
+            </select>
+            <input name="target_quantity" type="number" min="1" step="0.01" value={form.target_quantity} onChange={onChange} required />
+            <input name="budget_min" type="number" min="1" step="0.01" value={form.budget_min} onChange={onChange} required />
+            <input name="budget_max" type="number" min="1" step="0.01" value={form.budget_max} onChange={onChange} required />
+            <input name="required_by_date" type="date" value={form.required_by_date} onChange={onChange} required />
+            <select name="location" value={form.location} onChange={onChange} required>
+              <option value="">Select location</option>
+              {locations.map((location) => (
+                <option key={location.id} value={location.id}>
+                  {location.barangay}, {location.city_municipality}, {location.province}
+                </option>
+              ))}
+            </select>
+            <button type="submit">Create Demand</button>
+          </form>
+        </>
+      ) : <p className="section-label">Demand posting is manager-only in v4. You can review open plans below.</p>}
       <Toast message={message} type="success" />
       {error ? <ErrorState message={error} /> : null}
       <p className="section-label">Active Demand Posts</p>

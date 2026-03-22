@@ -51,7 +51,7 @@ function BuyerOrdersPage() {
     setSelectedViewId,
     saveView,
     deleteView,
-  } = useSavedViews('saved-views-orders-buyer')
+  } = useSavedViews('saved-views-requests-distributor')
 
   const listingById = useMemo(() => listings.reduce((acc, item) => {
     acc[item.id] = item
@@ -139,11 +139,11 @@ function BuyerOrdersPage() {
         delivery_location: Number(form.delivery_location),
         expected_delivery_date: form.expected_delivery_date,
       })
-      setMessage('Order created successfully')
-      addActivityLog({ title: `Buyer order created for listing #${form.listing} qty ${form.quantity}` })
+      setMessage('Request created successfully')
+      addActivityLog({ title: `Distributor request created for listing #${form.listing} qty ${form.quantity}` })
       loadData()
     } catch {
-      setError('Failed to create order. Check quantity and required fields.')
+      setError('Failed to create request. Check quantity and required fields.')
     }
   }
 
@@ -151,8 +151,8 @@ function BuyerOrdersPage() {
     <section className="panel">
       <PageHeader
         icon={ShoppingCart}
-        title="Buyer Orders"
-        subtitle="Create and monitor purchase orders from marketplace listings."
+        title="Distributor Requests"
+        subtitle="Create and monitor distribution requests from marketplace supply."
       />
       <DynamicAutoRefreshBadge
         active={isActive}
@@ -162,7 +162,7 @@ function BuyerOrdersPage() {
         onRefresh={refreshNow}
       />
 
-      <p className="section-label">Create New Order</p>
+      <p className="section-label">Create New Request</p>
 
       <form className="inline-form" onSubmit={onSubmit}>
         <select name="listing" value={form.listing} onChange={onChange} required>
@@ -183,13 +183,13 @@ function BuyerOrdersPage() {
           ))}
         </select>
         <input name="expected_delivery_date" type="date" value={form.expected_delivery_date} onChange={onChange} required />
-        <button type="submit">Create Order</button>
+        <button type="submit">Create Request</button>
       </form>
 
       <Toast message={message} type="success" />
       {error ? <ErrorState message={error} /> : null}
 
-      <p className="section-label">Order History</p>
+      <p className="section-label">Request History</p>
       <FilterBar>
         <input
           placeholder="Search by order id or status"
@@ -217,9 +217,9 @@ function BuyerOrdersPage() {
         />
         <ExportCenter
           title="Export CSV"
-          filename="buyer-orders.csv"
+          filename="distributor-requests.csv"
           columns={[
-            { key: 'id', label: 'Order ID' },
+            { key: 'id', label: 'Request ID' },
             { key: 'product', label: 'Product' },
             { key: 'status', label: 'Status' },
             { key: 'total_price', label: 'Total Price' },
@@ -241,7 +241,7 @@ function BuyerOrdersPage() {
           rows={filteredOrders}
           emptyFallback={<EmptyState title="No orders found" description="Create an order above to get started." />}
           columns={[
-            { key: 'id', label: 'Order', render: (order) => <Link to={`/orders/${order.id}`}>#{order.id}</Link> },
+            { key: 'id', label: 'Request', render: (order) => <Link to={`/requests/${order.id}`}>#{order.id}</Link> },
             {
               key: 'thumbnail',
               label: 'Image',
@@ -277,14 +277,14 @@ function BuyerOrdersPage() {
             key={order.id}
             image={getOrderImage(order)}
             fallback={getProduceFallbackImage(getOrderProductName(order), heroImage)}
-            title={`Order #${order.id} - ${getOrderProductName(order)}`}
+            title={`Request #${order.id} - ${getOrderProductName(order)}`}
           >
             <p><strong>Status:</strong> {order.status}</p>
             <p><strong>Readiness:</strong> <span className={`signal-chip ${getOrderReadiness(order).tone}`}>{getOrderReadiness(order).label}</span></p>
             <p><strong>Total:</strong> {formatCurrency(order.total_price)}</p>
             <p><strong>Expected:</strong> {order.expected_delivery_date || 'N/A'}</p>
             <ProgressStepper steps={ORDER_STATUSES} current={order.status} />
-            <Link to={`/orders/${order.id}`}>View Timeline</Link>
+            <Link to={`/requests/${order.id}`}>View Timeline</Link>
           </ImageCard>
         ))}
       </div>

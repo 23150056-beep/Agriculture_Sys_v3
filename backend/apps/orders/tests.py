@@ -16,20 +16,20 @@ User = get_user_model()
 
 class OrdersApiTests(APITestCase):
     def setUp(self):
-        self.farmer = User.objects.create_user(
-            username="order_farmer",
+        self.distributor = User.objects.create_user(
+            username="order_distributor",
             password="test12345",
-            role="FARMER",
+            role="DISTRIBUTOR",
         )
-        self.other_farmer = User.objects.create_user(
-            username="other_farmer",
+        self.other_distributor = User.objects.create_user(
+            username="other_distributor",
             password="test12345",
-            role="FARMER",
+            role="DISTRIBUTOR",
         )
-        self.buyer = User.objects.create_user(
-            username="order_buyer",
+        self.manager = User.objects.create_user(
+            username="order_manager",
             password="test12345",
-            role="BUYER",
+            role="MANAGER",
         )
 
         category = Category.objects.create(name="Order Test Category")
@@ -42,7 +42,7 @@ class OrdersApiTests(APITestCase):
         )
 
         listing = Listing.objects.create(
-            farmer=self.farmer,
+            farmer=self.distributor,
             product=product,
             quantity_available=Decimal("80.00"),
             unit_price=Decimal("30.00"),
@@ -56,18 +56,18 @@ class OrdersApiTests(APITestCase):
         )
 
         self.order = Order.objects.create(
-            buyer=self.buyer,
+            buyer=self.manager,
             listing=listing,
             quantity=Decimal("4.00"),
             unit_price_snapshot=Decimal("30.00"),
             total_price=Decimal("120.00"),
-            status="PENDING",
+            status="DRAFT",
             delivery_location=location,
             expected_delivery_date=timezone.localdate() + timedelta(days=2),
         )
 
-    def test_buyer_cannot_update_order_status(self):
-        self.client.force_authenticate(user=self.buyer)
+    def test_manager_cannot_confirm_request(self):
+        self.client.force_authenticate(user=self.manager)
         response = self.client.patch(
             f"/api/orders/{self.order.id}/status/",
             {"status": "CONFIRMED"},
@@ -75,29 +75,29 @@ class OrdersApiTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_farmer_can_update_own_order_status(self):
-        self.client.force_authenticate(user=self.farmer)
+    def test_distributor_can_submit_own_request(self):
+        self.client.force_authenticate(user=self.distributor)
         response = self.client.patch(
             f"/api/orders/{self.order.id}/status/",
-            {"status": "CONFIRMED"},
+            {"status": "SUBMITTED"},
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_farmer_cannot_update_other_farmer_order(self):
-        self.client.force_authenticate(user=self.other_farmer)
+    def test_distributor_cannot_update_other_distributor_request(self):
+        self.client.force_authenticate(user=self.other_distributor)
         response = self.client.patch(
             f"/api/orders/{self.order.id}/status/",
-            {"status": "CONFIRMED"},
+            {"status": "SUBMITTED"},
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_invalid_order_status_transition_rejected(self):
-        self.client.force_authenticate(user=self.farmer)
+        self.client.force_authenticate(user=self.distributor)
         response = self.client.patch(
             f"/api/orders/{self.order.id}/status/",
             {"status": "DELIVERED"},
             format="json",
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

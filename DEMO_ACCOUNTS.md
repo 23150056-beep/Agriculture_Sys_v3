@@ -21,11 +21,10 @@ All demo users share the same default password:
 | Role | Username | Full Name | Email |
 | --- | --- | --- | --- |
 | Admin | demo_admin | Demo Admin | demo_admin@example.com |
-| Farmer | demo_farmer_1 | Demo Farmer One | demo_farmer_1@example.com |
-| Farmer | demo_farmer_2 | Demo Farmer Two | demo_farmer_2@example.com |
-| Buyer | demo_buyer_1 | Demo Buyer One | demo_buyer_1@example.com |
-| Buyer | demo_buyer_2 | Demo Buyer Two | demo_buyer_2@example.com |
-| Dispatcher | demo_dispatcher | Demo Dispatcher | demo_dispatcher@example.com |
+| Manager | demo_manager_1 | Demo Manager One | demo_manager_1@example.com |
+| Manager | demo_manager_2 | Demo Manager Two | demo_manager_2@example.com |
+| Distributor | demo_distributor_1 | Demo Distributor One | demo_distributor_1@example.com |
+| Distributor | demo_distributor_2 | Demo Distributor Two | demo_distributor_2@example.com |
 
 ## Where To Use These Accounts
 

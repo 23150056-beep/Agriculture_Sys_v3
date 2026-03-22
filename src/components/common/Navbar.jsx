@@ -25,10 +25,10 @@ function Navbar({ user, onOpenPalette, densityMode, onChangeDensity }) {
       </Link>
       <nav>
         <Link to="/marketplace" className="nav-item"><PackageSearch size={16} />Marketplace</Link>
-        {user?.role === ROLES.BUYER || user?.role === ROLES.ADMIN ? <Link to="/orders/buyer" className="nav-item"><ShoppingBag size={16} />Buyer Orders</Link> : null}
-        {user?.role === ROLES.FARMER || user?.role === ROLES.ADMIN ? <Link to="/orders/farmer" className="nav-item"><ShoppingBag size={16} />Farmer Orders</Link> : null}
-        {user?.role === ROLES.BUYER || user?.role === ROLES.ADMIN ? <Link to="/demand-board" className="nav-item"><LayoutDashboard size={16} />Demand Board</Link> : null}
-        {user?.role === ROLES.DISPATCHER || user?.role === ROLES.ADMIN ? <Link to="/logistics/dispatch-board" className="nav-item"><Truck size={16} />Dispatch</Link> : null}
+        {user?.role === ROLES.DISTRIBUTOR || user?.role === ROLES.ADMIN ? <Link to="/requests/mine" className="nav-item"><ShoppingBag size={16} />My Requests</Link> : null}
+        {user?.role === ROLES.MANAGER || user?.role === ROLES.ADMIN ? <Link to="/requests/queue" className="nav-item"><ShoppingBag size={16} />Queue</Link> : null}
+        {(user?.role === ROLES.MANAGER || user?.role === ROLES.DISTRIBUTOR || user?.role === ROLES.ADMIN) ? <Link to="/demand-board" className="nav-item"><LayoutDashboard size={16} />Demand Board</Link> : null}
+        {user?.role === ROLES.MANAGER || user?.role === ROLES.ADMIN ? <Link to="/distribution/board" className="nav-item"><Truck size={16} />Distribution</Link> : null}
         <Link to="/profile" className="nav-item"><UserRound size={16} />Profile</Link>
       </nav>
       <div className="user-meta">

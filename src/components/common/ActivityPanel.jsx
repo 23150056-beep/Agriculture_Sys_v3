@@ -16,16 +16,16 @@ function ActivityPanel({ items = [], title = 'Activity Stream' }) {
     const actions = []
 
     if (metadata.order_id) {
-      actions.push({ label: `Order #${metadata.order_id}`, href: `/orders/${metadata.order_id}` })
+      actions.push({ label: `Request #${metadata.order_id}`, href: `/requests/${metadata.order_id}` })
     }
     if (metadata.shipment_id) {
-      actions.push({ label: `Shipment #${metadata.shipment_id}`, href: `/logistics/shipment-tracking?q=${encodeURIComponent(metadata.shipment_id)}` })
+      actions.push({ label: `Shipment #${metadata.shipment_id}`, href: `/distribution/tracking?q=${encodeURIComponent(metadata.shipment_id)}` })
     }
     if (metadata.demand_post_id) {
       actions.push({ label: `Demand #${metadata.demand_post_id}`, href: `/demand-board?q=${encodeURIComponent(metadata.demand_post_id)}` })
     }
     if (metadata.trip_id) {
-      actions.push({ label: `Trip #${metadata.trip_id}`, href: '/logistics/trip-planner' })
+      actions.push({ label: `Trip #${metadata.trip_id}`, href: '/distribution/planner' })
     }
 
     return actions

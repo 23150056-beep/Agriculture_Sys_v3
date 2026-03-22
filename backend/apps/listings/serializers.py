@@ -14,6 +14,8 @@ class ListingSerializer(serializers.ModelSerializer):
     images = ListingImageSerializer(many=True, read_only=True)
     product_name = serializers.CharField(source="product.name", read_only=True)
     farmer_name = serializers.CharField(source="farmer.full_name", read_only=True)
+    distributor_name = serializers.CharField(source="farmer.full_name", read_only=True)
+    distributor_id = serializers.IntegerField(source="farmer_id", read_only=True)
 
     class Meta:
         model = Listing

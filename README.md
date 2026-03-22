@@ -1,6 +1,19 @@
 # Agriculture Sys v3
 
-A full-stack agriculture distribution platform prototype with role-based workflows for admins, farmers, buyers, and dispatchers.
+A full-stack agriculture distribution platform prototype with role-based workflows for admins, managers, and distributors.
+
+## v4 Migration Blueprint (Canonical)
+
+The repository now includes a v4 migration documentation set that defines the target 3-role model and unified request workflow.
+
+- docs/V4_SYSTEM_OVERVIEW.md
+- docs/V4_ROLE_MATRIX.md
+- docs/V4_WORKFLOW_STATE_MACHINE.md
+- docs/V4_API_CONTRACT.md
+- docs/V4_MIGRATION_MAP_FROM_V3.md
+- docs/V4_GLOSSARY.md
+
+If you are implementing new work, use the v4 docs above as source of truth for naming, RBAC, and lifecycle behavior.
 
 ## Tech Stack
 

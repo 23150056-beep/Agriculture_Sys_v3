@@ -1,0 +1,150 @@
+@startuml
+top to bottom direction
+skinparam shadowing false
+skinparam actorStyle stickman
+skinparam packageStyle rectangle
+skinparam defaultFontName Arial
+skinparam usecase {
+  BackgroundColor #F7F7F7
+  BorderColor #333333
+  ArrowColor #444444
+}
+
+actor Admin as A
+actor Manager as M
+actor Distributor as D
+
+rectangle "Centralized Agricultural Product Distribution Management System for the\nBauang Agricultural Trade Center\n(AGRI_SYS_V3)" {
+  (Login) as UC_Login
+
+  (User Management) as UC_User
+  (Register Account) as UC_Register
+  (View Profile) as UC_Profile
+
+  (Listing Management) as UC_Listing
+  (Create Listing) as UC_ListingCreate
+  (Edit Listing) as UC_ListingEdit
+  (View Listings) as UC_ListingView
+  (Clone Listing) as UC_ListingClone
+
+  (Marketplace and Demand Management) as UC_Demand
+  (Browse Marketplace) as UC_Marketplace
+  (Create Demand Post) as UC_DemandCreate
+  (Submit Demand Offer) as UC_DemandOffer
+  (View Demand Offers) as UC_DemandView
+
+  (Order Management) as UC_Order
+  (Create Order) as UC_OrderCreate
+  (Update Order Status) as UC_OrderStatus
+  (View Buyer Orders) as UC_OrderBuyer
+  (View Farmer Orders) as UC_OrderFarmer
+
+  (Logistics Management) as UC_Logistics
+  (Create Trip) as UC_TripCreate
+  (Assign Shipment) as UC_ShipAssign
+  (Track Shipment) as UC_Track
+  (Update Shipment Status) as UC_ShipStatus
+  (Proof of Delivery) as UC_POD
+
+  (Generate Report) as UC_Report
+  (View Role Dashboard) as UC_DashView
+  (View Summary Metrics) as UC_Summary
+  (View Activity Log) as UC_Activity
+  (Export CSV Report) as UC_Export
+
+  ' Main template vertical flow
+  UC_Login -[hidden]down-> UC_User
+  UC_User -[hidden]down-> UC_Listing
+  UC_Listing -[hidden]down-> UC_Demand
+  UC_Demand -[hidden]down-> UC_Order
+  UC_Order -[hidden]down-> UC_Logistics
+  UC_Logistics -[hidden]down-> UC_Report
+
+  ' Sub-action rows under each module
+  UC_User -[hidden]down-> UC_Register
+  UC_Register -[hidden]right-> UC_Profile
+
+  UC_Listing -[hidden]down-> UC_ListingCreate
+  UC_ListingCreate -[hidden]right-> UC_ListingEdit
+  UC_ListingEdit -[hidden]right-> UC_ListingView
+  UC_ListingView -[hidden]right-> UC_ListingClone
+
+  UC_Demand -[hidden]down-> UC_Marketplace
+  UC_Marketplace -[hidden]right-> UC_DemandCreate
+  UC_DemandCreate -[hidden]right-> UC_DemandOffer
+  UC_DemandOffer -[hidden]right-> UC_DemandView
+
+  UC_Order -[hidden]down-> UC_OrderCreate
+  UC_OrderCreate -[hidden]right-> UC_OrderStatus
+  UC_OrderStatus -[hidden]right-> UC_OrderBuyer
+  UC_OrderBuyer -[hidden]right-> UC_OrderFarmer
+
+  UC_Logistics -[hidden]down-> UC_TripCreate
+  UC_TripCreate -[hidden]right-> UC_ShipAssign
+  UC_ShipAssign -[hidden]right-> UC_Track
+  UC_Track -[hidden]right-> UC_ShipStatus
+  UC_ShipStatus -[hidden]right-> UC_POD
+
+  UC_Report -[hidden]down-> UC_DashView
+  UC_DashView -[hidden]right-> UC_Summary
+  UC_Summary -[hidden]right-> UC_Activity
+  UC_Activity -[hidden]right-> UC_Export
+}
+
+' Place actors at side-mid anchors to avoid long outer loops
+A -[hidden]right-> UC_Order
+M -[hidden]left-> UC_Order
+D -[hidden]left-> UC_Logistics
+M -[hidden]down-> D
+
+' Include decomposition
+UC_User ..> UC_Register : <<include>>
+UC_User ..> UC_Profile : <<include>>
+
+UC_Listing ..> UC_ListingCreate : <<include>>
+UC_Listing ..> UC_ListingEdit : <<include>>
+UC_Listing ..> UC_ListingView : <<include>>
+UC_Listing ..> UC_ListingClone : <<include>>
+
+UC_Demand ..> UC_Marketplace : <<include>>
+UC_Demand ..> UC_DemandCreate : <<include>>
+UC_Demand ..> UC_DemandOffer : <<include>>
+UC_Demand ..> UC_DemandView : <<include>>
+
+UC_Order ..> UC_OrderCreate : <<include>>
+UC_Order ..> UC_OrderStatus : <<include>>
+UC_Order ..> UC_OrderBuyer : <<include>>
+UC_Order ..> UC_OrderFarmer : <<include>>
+
+UC_Logistics ..> UC_TripCreate : <<include>>
+UC_Logistics ..> UC_ShipAssign : <<include>>
+UC_Logistics ..> UC_Track : <<include>>
+UC_Logistics ..> UC_ShipStatus : <<include>>
+UC_Logistics ..> UC_POD : <<include>>
+
+UC_Report ..> UC_DashView : <<include>>
+UC_Report ..> UC_Summary : <<include>>
+UC_Report ..> UC_Activity : <<include>>
+UC_Report ..> UC_Export : <<include>>
+
+' Main actor relationships only (cleaner and template-like)
+A -- UC_Login
+A -- UC_User
+A -- UC_Listing
+A -- UC_Demand
+A -- UC_Order
+A -- UC_Logistics
+A -- UC_Report
+
+M -- UC_Login
+M -- UC_User
+M -- UC_Listing
+M -- UC_Order
+M -- UC_Report
+
+D -- UC_Login
+D -- UC_Logistics
+D -- UC_Order
+D -- UC_Report
+
+@enduml

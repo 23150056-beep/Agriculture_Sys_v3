@@ -10,7 +10,7 @@ import ErrorState from '../../components/common/ErrorState'
 import FilterBar from '../../components/common/FilterBar'
 import ImageCard from '../../components/common/ImageCard'
 import SkeletonLoader from '../../components/common/SkeletonLoader'
-import { getFarmerOrders, updateOrderStatus } from '../../api/ordersApi'
+import { getManagerQueue, updateOrderStatus } from '../../api/ordersApi'
 import PageHeader from '../../components/common/PageHeader'
 import StatusBadge from '../../components/common/StatusBadge'
 import Toast from '../../components/common/Toast'
@@ -21,7 +21,7 @@ import { getProduceFallbackImage } from '../../utils/produceImage'
 import useAutoRefresh from '../../hooks/useAutoRefresh'
 import useSavedViews from '../../hooks/useSavedViews'
 
-const STATUS_OPTIONS = ['CONFIRMED', 'PACKED', 'ASSIGNED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED']
+const STATUS_OPTIONS = ['UNDER_REVIEW', 'APPROVED', 'REJECTED', 'IN_DELIVERY', 'DELIVERED']
 
 function FarmerOrdersPage() {
   const [searchParams] = useSearchParams()
@@ -42,7 +42,7 @@ function FarmerOrdersPage() {
     setSelectedViewId,
     saveView,
     deleteView,
-  } = useSavedViews('saved-views-orders-farmer')
+  } = useSavedViews('saved-views-requests-manager-queue')
 
   const getOrderProductName = (order) => order.listing_product_name || `Product #${order.listing}`
   const getOrderImage = (order) => order.listing_image || getProduceFallbackImage(getOrderProductName(order), heroImage)
@@ -59,11 +59,11 @@ function FarmerOrdersPage() {
 
   const loadOrders = useCallback(async () => {
     try {
-      const { data } = await getFarmerOrders()
+      const { data } = await getManagerQueue()
       setOrders(data)
       setError('')
     } catch {
-      setError('Failed to load farmer orders')
+      setError('Failed to load manager queue')
     } finally {
       setLoading(false)
     }
@@ -134,7 +134,7 @@ function FarmerOrdersPage() {
     setBulkUpdating(true)
 
     const results = await Promise.allSettled(
-      selectedOrderIds.map((orderId) => updateOrderStatus(orderId, { status: bulkStatus, note: 'Bulk updated by farmer module' })),
+      selectedOrderIds.map((orderId) => updateOrderStatus(orderId, { status: bulkStatus, note: 'Bulk updated by manager queue' })),
     )
 
     const successCount = results.filter((result) => result.status === 'fulfilled').length
@@ -142,7 +142,7 @@ function FarmerOrdersPage() {
 
     if (successCount > 0) {
       setMessage(`${successCount} order${successCount > 1 ? 's' : ''} updated to ${bulkStatus}`)
-      addActivityLog({ title: `Farmer bulk-updated ${successCount} order${successCount > 1 ? 's' : ''} to ${bulkStatus}` })
+      addActivityLog({ title: `Manager bulk-updated ${successCount} request${successCount > 1 ? 's' : ''} to ${bulkStatus}` })
     }
     if (failedCount > 0) {
       setError(`${failedCount} update${failedCount > 1 ? 's' : ''} failed due to transition rules or server validation.`)
@@ -160,12 +160,12 @@ function FarmerOrdersPage() {
     setError('')
     setMessage('')
     try {
-      await updateOrderStatus(orderId, { status, note: 'Updated by farmer module' })
-      setMessage(`Order #${orderId} updated to ${status}`)
-      addActivityLog({ title: `Farmer updated order #${orderId} to ${status}` })
+      await updateOrderStatus(orderId, { status, note: 'Updated by manager queue' })
+      setMessage(`Request #${orderId} updated to ${status}`)
+      addActivityLog({ title: `Manager updated request #${orderId} to ${status}` })
       refreshNow()
     } catch {
-      setError('Could not update order status. Ensure transition is valid.')
+      setError('Could not update request status. Ensure transition is valid.')
     }
   }
 
@@ -173,8 +173,8 @@ function FarmerOrdersPage() {
     <section className="panel">
       <PageHeader
         icon={ClipboardCheck}
-        title="Farmer Orders"
-        subtitle="Manage status transitions for orders tied to your listings."
+        title="Manager Approval Queue"
+        subtitle="Review and update status transitions for queued requests."
       />
       <DynamicAutoRefreshBadge
         active={isActive}
@@ -187,7 +187,7 @@ function FarmerOrdersPage() {
       {error ? <ErrorState message={error} /> : null}
       <FilterBar>
         <input
-          placeholder="Search farmer orders"
+          placeholder="Search queued requests"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
@@ -212,9 +212,9 @@ function FarmerOrdersPage() {
         />
         <ExportCenter
           title="Export CSV"
-          filename="farmer-orders.csv"
+          filename="manager-queue.csv"
           columns={[
-            { key: 'id', label: 'Order ID' },
+            { key: 'id', label: 'Request ID' },
             { key: 'product', label: 'Product' },
             { key: 'status', label: 'Status' },
             { key: 'expected_delivery_date', label: 'Expected Delivery' },
@@ -245,14 +245,14 @@ function FarmerOrdersPage() {
         <DataTable
           rowKey="id"
           rows={filteredOrders}
-          emptyFallback={<EmptyState title="No farmer orders" description="Orders tied to your listings will appear here." />}
+          emptyFallback={<EmptyState title="No queue items" description="Submitted requests awaiting manager action will appear here." />}
           columns={[
             {
               key: 'select',
               label: (
                 <input
                   type="checkbox"
-                  aria-label="Select all filtered orders"
+                  aria-label="Select all filtered requests"
                   checked={allFilteredSelected}
                   onChange={(event) => toggleSelectAllFiltered(event.target.checked)}
                 />
@@ -260,13 +260,13 @@ function FarmerOrdersPage() {
               render: (order) => (
                 <input
                   type="checkbox"
-                  aria-label={`Select order ${order.id}`}
+                  aria-label={`Select request ${order.id}`}
                   checked={selectedOrderIds.includes(order.id)}
                   onChange={(event) => toggleSelectOrder(order.id, event.target.checked)}
                 />
               ),
             },
-            { key: 'id', label: 'Order', render: (order) => `#${order.id}` },
+            { key: 'id', label: 'Request', render: (order) => `#${order.id}` },
             {
               key: 'thumbnail',
               label: 'Image',
@@ -311,7 +311,7 @@ function FarmerOrdersPage() {
             key={order.id}
             image={getOrderImage(order)}
             fallback={getProduceFallbackImage(getOrderProductName(order), heroImage)}
-            title={`Order #${order.id} - ${getOrderProductName(order)}`}
+            title={`Request #${order.id} - ${getOrderProductName(order)}`}
           >
             <label className="row-check">
               <input

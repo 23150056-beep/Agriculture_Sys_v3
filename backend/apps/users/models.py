@@ -5,11 +5,10 @@ from django.db import models
 class User(AbstractUser):
     class Roles(models.TextChoices):
         ADMIN = "ADMIN", "Admin"
-        FARMER = "FARMER", "Farmer"
-        BUYER = "BUYER", "Buyer"
-        DISPATCHER = "DISPATCHER", "Dispatcher"
+        MANAGER = "MANAGER", "Manager"
+        DISTRIBUTOR = "DISTRIBUTOR", "Distributor"
 
-    role = models.CharField(max_length=20, choices=Roles.choices, default=Roles.BUYER)
+    role = models.CharField(max_length=20, choices=Roles.choices, default=Roles.DISTRIBUTOR)
     full_name = models.CharField(max_length=255, blank=True)
     phone = models.CharField(max_length=20, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

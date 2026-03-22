@@ -8,13 +8,13 @@ class IsRole(BasePermission):
         return bool(request.user and request.user.is_authenticated and request.user.role in self.allowed_roles)
 
 
-class IsFarmer(IsRole):
-    allowed_roles = ["FARMER", "ADMIN"]
+class IsDistributor(IsRole):
+    allowed_roles = ["DISTRIBUTOR", "ADMIN"]
 
 
-class IsBuyer(IsRole):
-    allowed_roles = ["BUYER", "ADMIN"]
+class IsManager(IsRole):
+    allowed_roles = ["MANAGER", "ADMIN"]
 
 
-class IsDispatcher(IsRole):
-    allowed_roles = ["DISPATCHER", "ADMIN"]
+class IsAdmin(IsRole):
+    allowed_roles = ["ADMIN"]

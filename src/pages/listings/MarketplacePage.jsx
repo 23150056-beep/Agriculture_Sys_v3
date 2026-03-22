@@ -195,7 +195,7 @@ function MarketplacePage() {
             <p><strong>Price:</strong> {formatCurrency(activeListing.unit_price)}</p>
             <p><strong>Quality:</strong> {activeListing.quality_grade || 'N/A'}</p>
             <p><strong>Available until:</strong> {activeListing.available_until || 'N/A'}</p>
-            <p><strong>Farmer:</strong> {activeListing.farmer_name || 'N/A'}</p>
+            <p><strong>Distributor:</strong> {activeListing.distributor_name || activeListing.farmer_name || 'N/A'}</p>
           </div>
         ) : null}
       </DetailDrawer>

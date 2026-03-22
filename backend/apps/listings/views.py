@@ -1,6 +1,6 @@
 from rest_framework import decorators, permissions, response, status, viewsets
 
-from apps.users.permissions import IsFarmer
+from apps.users.permissions import IsDistributor
 
 from .models import Listing
 from .serializers import ListingSerializer
@@ -12,18 +12,22 @@ class ListingViewSet(viewsets.ModelViewSet):
     serializer_class = ListingSerializer
 
     def get_permissions(self):
-        if self.action in ["create", "update", "partial_update", "destroy", "mine", "clone"]:
-            return [permissions.IsAuthenticated(), IsFarmer()]
+        if self.action in ["create", "update", "partial_update", "destroy", "mine", "mine_legacy", "clone"]:
+            return [permissions.IsAuthenticated(), IsDistributor()]
         return [permissions.IsAuthenticated()]
 
     def perform_create(self, serializer):
         serializer.save(farmer=self.request.user)
 
-    @decorators.action(detail=False, methods=["get"], url_path="farmer/mine")
+    @decorators.action(detail=False, methods=["get"], url_path="distributor/mine")
     def mine(self, request):
         queryset = self.get_queryset().filter(farmer=request.user)
         data = self.get_serializer(queryset, many=True).data
         return response.Response(data)
+
+    @decorators.action(detail=False, methods=["get"], url_path="farmer/mine")
+    def mine_legacy(self, request):
+        return self.mine(request)
 
     @decorators.action(detail=True, methods=["post"], url_path="clone")
     def clone(self, request, pk=None):

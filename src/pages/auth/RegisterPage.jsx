@@ -9,7 +9,7 @@ import heroImage from '../../assets/hero.png'
 
 function RegisterPage() {
   const navigate = useNavigate()
-  const [form, setForm] = useState({ username: '', email: '', password: '', role: ROLES.BUYER, full_name: '', phone: '' })
+  const [form, setForm] = useState({ username: '', email: '', password: '', role: ROLES.DISTRIBUTOR, full_name: '', phone: '' })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
@@ -43,9 +43,8 @@ function RegisterPage() {
         <input type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
         <input placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
         <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
-          <option value={ROLES.FARMER}>Farmer</option>
-          <option value={ROLES.BUYER}>Buyer</option>
-          <option value={ROLES.DISPATCHER}>Dispatcher</option>
+          <option value={ROLES.DISTRIBUTOR}>Distributor</option>
+          <option value={ROLES.MANAGER}>Manager</option>
         </select>
         <input type="password" placeholder="Password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
         <button type="submit" disabled={saving}>{saving ? 'Creating...' : 'Create Account'}</button>

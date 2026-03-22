@@ -61,7 +61,7 @@ function DispatchBoardPage() {
     try {
       await assignShipment({ shipment_id: shipmentId, trip_id: Number(tripId) })
       setMessage(`Shipment #${shipmentId} assigned`)
-      addActivityLog({ title: `Dispatcher assigned shipment #${shipmentId} to trip #${tripId}` })
+      addActivityLog({ title: `Manager assigned shipment #${shipmentId} to trip #${tripId}` })
       loadData()
     } catch (error) {
       setShipments(previousShipments)
@@ -86,7 +86,7 @@ function DispatchBoardPage() {
     try {
       await updateShipmentStatus(shipmentId, { status })
       setMessage(`Shipment #${shipmentId} updated to ${status}`)
-      addActivityLog({ title: `Dispatcher updated shipment #${shipmentId} to ${status}` })
+      addActivityLog({ title: `Manager updated shipment #${shipmentId} to ${status}` })
       loadData()
     } catch (error) {
       setShipments(previousShipments)
@@ -98,7 +98,7 @@ function DispatchBoardPage() {
 
   return (
     <section className="panel">
-      <PageHeader icon={ListChecks} title="Dispatch Board" subtitle="Assign pending shipments and update shipment movement status." />
+      <PageHeader icon={ListChecks} title="Distribution Board" subtitle="Assign pending shipments and update shipment movement status." />
 
       <Toast message={message} type="success" />
       {error ? <ErrorState message={error} /> : null}

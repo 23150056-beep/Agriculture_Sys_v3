@@ -1,7 +1,7 @@
 from rest_framework import decorators, permissions, response, viewsets
 
 from apps.dashboard.services import log_activity
-from apps.users.permissions import IsBuyer, IsFarmer
+from apps.users.permissions import IsDistributor, IsManager
 
 from .models import DemandOffer, DemandPost
 from .serializers import DemandOfferSerializer, DemandPostSerializer
@@ -13,7 +13,9 @@ class DemandPostViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ["create"]:
-            return [permissions.IsAuthenticated(), IsBuyer()]
+            return [permissions.IsAuthenticated(), IsManager()]
+        if self.action in ["offers"]:
+            return [permissions.IsAuthenticated(), IsDistributor()]
         return [permissions.IsAuthenticated()]
 
     def perform_create(self, serializer):
@@ -48,5 +50,5 @@ class DemandOfferViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ["create"]:
-            return [permissions.IsAuthenticated(), IsFarmer()]
+            return [permissions.IsAuthenticated(), IsDistributor()]
         return [permissions.IsAuthenticated()]

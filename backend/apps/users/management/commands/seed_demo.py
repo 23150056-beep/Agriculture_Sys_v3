@@ -34,11 +34,10 @@ class Command(BaseCommand):
 
         demo_usernames = [
             "demo_admin",
-            "demo_farmer_1",
-            "demo_farmer_2",
-            "demo_buyer_1",
-            "demo_buyer_2",
-            "demo_dispatcher",
+            "demo_manager_1",
+            "demo_manager_2",
+            "demo_distributor_1",
+            "demo_distributor_2",
         ]
 
         if reset:
@@ -53,7 +52,7 @@ class Command(BaseCommand):
                 OrderStatusLog.objects.filter(order__buyer__username__in=demo_usernames).delete()
                 Order.objects.filter(buyer__username__in=demo_usernames).delete()
                 Listing.objects.filter(farmer__username__in=demo_usernames).delete()
-                Trip.objects.filter(dispatcher__username="demo_dispatcher").delete()
+                Trip.objects.filter(dispatcher__username__in=["demo_manager_1", "demo_manager_2"]).delete()
                 Driver.objects.filter(license_no__startswith="DEMO-").delete()
                 Vehicle.objects.filter(plate_number__startswith="DEMO-").delete()
                 Product.objects.filter(name__startswith="DEMO ").delete()
@@ -74,44 +73,36 @@ class Command(BaseCommand):
                 is_staff=True,
                 is_superuser=True,
             ),
-            "farmer_1": self._upsert_user(
-                "demo_farmer_1",
-                "FARMER",
-                "Demo Farmer One",
-                "demo_farmer_1@example.com",
+            "distributor_1": self._upsert_user(
+                "demo_distributor_1",
+                "DISTRIBUTOR",
+                "Demo Distributor One",
+                "demo_distributor_1@example.com",
                 "09170000002",
                 password,
             ),
-            "farmer_2": self._upsert_user(
-                "demo_farmer_2",
-                "FARMER",
-                "Demo Farmer Two",
-                "demo_farmer_2@example.com",
+            "distributor_2": self._upsert_user(
+                "demo_distributor_2",
+                "DISTRIBUTOR",
+                "Demo Distributor Two",
+                "demo_distributor_2@example.com",
                 "09170000003",
                 password,
             ),
-            "buyer_1": self._upsert_user(
-                "demo_buyer_1",
-                "BUYER",
-                "Demo Buyer One",
-                "demo_buyer_1@example.com",
+            "manager_1": self._upsert_user(
+                "demo_manager_1",
+                "MANAGER",
+                "Demo Manager One",
+                "demo_manager_1@example.com",
                 "09170000004",
                 password,
             ),
-            "buyer_2": self._upsert_user(
-                "demo_buyer_2",
-                "BUYER",
-                "Demo Buyer Two",
-                "demo_buyer_2@example.com",
+            "manager_2": self._upsert_user(
+                "demo_manager_2",
+                "MANAGER",
+                "Demo Manager Two",
+                "demo_manager_2@example.com",
                 "09170000005",
-                password,
-            ),
-            "dispatcher": self._upsert_user(
-                "demo_dispatcher",
-                "DISPATCHER",
-                "Demo Dispatcher",
-                "demo_dispatcher@example.com",
-                "09170000006",
                 password,
             ),
         }
@@ -163,7 +154,7 @@ class Command(BaseCommand):
         listings = []
         today = timezone.localdate()
         for index in range(20):
-            farmer = users["farmer_1"] if index % 2 == 0 else users["farmer_2"]
+            farmer = users["distributor_1"] if index % 2 == 0 else users["distributor_2"]
             product = products[index % len(products)]
             location = locations[index % len(locations)]
             quantity = Decimal(str(90 + index * 3))
@@ -185,25 +176,25 @@ class Command(BaseCommand):
             )
             listings.append(listing)
 
-        buyers = [users["buyer_1"], users["buyer_2"]]
+        managers = [users["manager_1"], users["manager_2"]]
         order_statuses = [
-            "PENDING",
-            "CONFIRMED",
-            "PACKED",
-            "ASSIGNED",
-            "IN_TRANSIT",
+            "DRAFT",
+            "SUBMITTED",
+            "UNDER_REVIEW",
+            "APPROVED",
+            "IN_DELIVERY",
             "DELIVERED",
-            "CANCELLED",
             "CONFIRMED",
+            "REJECTED",
         ]
         orders = []
         for index in range(8):
             listing = listings[index]
-            buyer = buyers[index % len(buyers)]
+            manager = managers[index % len(managers)]
             quantity = Decimal("10") + Decimal(str(index))
             total = quantity * listing.unit_price
             order = Order.objects.create(
-                buyer=buyer,
+                buyer=manager,
                 listing=listing,
                 quantity=quantity,
                 unit_price_snapshot=listing.unit_price,
@@ -213,7 +204,7 @@ class Command(BaseCommand):
                 expected_delivery_date=today + timedelta(days=3 + index),
             )
             orders.append(order)
-            self._create_status_timeline(order, buyer)
+            self._create_status_timeline(order, manager)
 
         vehicles = []
         for index, capacity in enumerate([1200, 1500, 1800], start=1):
@@ -238,7 +229,7 @@ class Command(BaseCommand):
         trips = []
         for index in range(3):
             trip = Trip.objects.create(
-                dispatcher=users["dispatcher"],
+                dispatcher=users["manager_1"],
                 vehicle=vehicles[index],
                 driver=drivers[index],
                 scheduled_date=today + timedelta(days=1 + index),
@@ -249,11 +240,11 @@ class Command(BaseCommand):
         for index, order in enumerate(orders):
             shipment_status = "PENDING_ASSIGNMENT"
             trip = None
-            if order.status in ["ASSIGNED", "IN_TRANSIT", "DELIVERED"]:
+            if order.status in ["IN_DELIVERY", "DELIVERED", "CONFIRMED"]:
                 shipment_status = {
-                    "ASSIGNED": "SCHEDULED",
-                    "IN_TRANSIT": "IN_TRANSIT",
+                    "IN_DELIVERY": "IN_TRANSIT",
                     "DELIVERED": "DELIVERED",
+                    "CONFIRMED": "DELIVERED",
                 }[order.status]
                 trip = trips[index % len(trips)]
 
@@ -267,7 +258,7 @@ class Command(BaseCommand):
         demand_posts = []
         for index in range(5):
             demand_post = DemandPost.objects.create(
-                buyer=buyers[index % len(buyers)],
+                buyer=managers[index % len(managers)],
                 product=products[(index + 2) % len(products)],
                 target_quantity=Decimal(str(50 + index * 10)),
                 budget_min=Decimal("1000.00") + Decimal(str(index * 300)),
@@ -278,7 +269,7 @@ class Command(BaseCommand):
             )
             demand_posts.append(demand_post)
 
-        farmers = [users["farmer_1"], users["farmer_2"]]
+        farmers = [users["distributor_1"], users["distributor_2"]]
         for index, post in enumerate(demand_posts):
             DemandOffer.objects.create(
                 demand_post=post,
@@ -291,7 +282,7 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("Demo seed complete."))
         self.stdout.write("Accounts password: {}".format(password))
-        self.stdout.write("Created: 6 users, 10 products, 20 listings, 8 orders, 3 trips, 5 demand posts")
+    self.stdout.write("Created: 5 users, 10 products, 20 listings, 8 requests, 3 trips, 5 demand posts")
 
     def _upsert_user(self, username, role, full_name, email, phone, password, is_staff=False, is_superuser=False):
         user, _ = User.objects.update_or_create(
@@ -316,13 +307,14 @@ class Command(BaseCommand):
 
     def _create_status_timeline(self, order, actor):
         path = {
-            "PENDING": ["PENDING"],
-            "CONFIRMED": ["PENDING", "CONFIRMED"],
-            "PACKED": ["PENDING", "CONFIRMED", "PACKED"],
-            "ASSIGNED": ["PENDING", "CONFIRMED", "PACKED", "ASSIGNED"],
-            "IN_TRANSIT": ["PENDING", "CONFIRMED", "PACKED", "ASSIGNED", "IN_TRANSIT"],
-            "DELIVERED": ["PENDING", "CONFIRMED", "PACKED", "ASSIGNED", "IN_TRANSIT", "DELIVERED"],
-            "CANCELLED": ["PENDING", "CANCELLED"],
+            "DRAFT": ["DRAFT"],
+            "SUBMITTED": ["DRAFT", "SUBMITTED"],
+            "UNDER_REVIEW": ["DRAFT", "SUBMITTED", "UNDER_REVIEW"],
+            "APPROVED": ["DRAFT", "SUBMITTED", "UNDER_REVIEW", "APPROVED"],
+            "IN_DELIVERY": ["DRAFT", "SUBMITTED", "UNDER_REVIEW", "APPROVED", "IN_DELIVERY"],
+            "DELIVERED": ["DRAFT", "SUBMITTED", "UNDER_REVIEW", "APPROVED", "IN_DELIVERY", "DELIVERED"],
+            "CONFIRMED": ["DRAFT", "SUBMITTED", "UNDER_REVIEW", "APPROVED", "IN_DELIVERY", "DELIVERED", "CONFIRMED"],
+            "REJECTED": ["DRAFT", "SUBMITTED", "UNDER_REVIEW", "REJECTED"],
         }.get(order.status, [order.status])
 
         previous = ""

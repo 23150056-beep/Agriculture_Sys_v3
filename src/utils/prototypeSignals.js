@@ -35,12 +35,12 @@ export const getOrderReadiness = (order) => {
   const eta = order.expected_delivery_date ? new Date(order.expected_delivery_date) : null
   const now = new Date()
 
-  if (status === 'DELIVERED') return { label: 'Completed', tone: 'safe' }
-  if (status === 'CANCELLED' || status === 'FAILED') return { label: 'Blocked', tone: 'danger' }
-  if (status === 'IN_TRANSIT' || status === 'ASSIGNED') return { label: 'Ready', tone: 'safe' }
-  if (eta && eta < now && status !== 'DELIVERED') return { label: 'At risk', tone: 'danger' }
-  if (status === 'PACKED' || status === 'CONFIRMED') return { label: 'On track', tone: 'warning' }
-  return { label: 'Pending prep', tone: 'neutral' }
+  if (status === 'CONFIRMED') return { label: 'Completed', tone: 'safe' }
+  if (status === 'REJECTED' || status === 'FAILED') return { label: 'Blocked', tone: 'danger' }
+  if (status === 'IN_DELIVERY' || status === 'DELIVERED') return { label: 'Ready', tone: 'safe' }
+  if (eta && eta < now && status !== 'CONFIRMED') return { label: 'At risk', tone: 'danger' }
+  if (status === 'UNDER_REVIEW' || status === 'APPROVED') return { label: 'On track', tone: 'warning' }
+  return { label: 'Awaiting action', tone: 'neutral' }
 }
 
 export const getShipmentDelayRisk = (shipment) => {

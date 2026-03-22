@@ -20,14 +20,14 @@ function OrderDetailsPage() {
     <section className="panel">
       <PageHeader
         icon={History}
-        title={`Order Timeline #${id}`}
-        subtitle="Trace every status transition for this order."
+        title={`Request Timeline #${id}`}
+        subtitle="Trace every status transition for this request."
       />
       <ProgressStepper
         steps={ORDER_STATUSES}
         current={timeline.length ? timeline[timeline.length - 1].to_status : ORDER_STATUSES[0]}
       />
-      {timeline.length > 0 ? <Timeline items={timeline} /> : <EmptyState title="No timeline events" description="No status changes recorded for this order yet." />}
+      {timeline.length > 0 ? <Timeline items={timeline} /> : <EmptyState title="No timeline events" description="No status changes recorded for this request yet." />}
     </section>
   )
 }

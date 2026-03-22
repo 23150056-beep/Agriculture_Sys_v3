@@ -17,6 +17,10 @@ class OrderSerializer(serializers.ModelSerializer):
     timeline = OrderStatusLogSerializer(many=True, read_only=True)
     listing_product_name = serializers.CharField(source="listing.product.name", read_only=True)
     listing_image = serializers.SerializerMethodField()
+    requester_id = serializers.IntegerField(source="buyer_id", read_only=True)
+    requester_name = serializers.CharField(source="buyer.full_name", read_only=True)
+    distributor_id = serializers.IntegerField(source="listing.farmer_id", read_only=True)
+    distributor_name = serializers.CharField(source="listing.farmer.full_name", read_only=True)
 
     class Meta:
         model = Order

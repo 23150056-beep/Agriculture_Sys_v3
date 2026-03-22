@@ -11,40 +11,33 @@ const DEMO_USERS = {
     email: 'demo_admin@example.com',
     phone: '09170000001',
   },
-  demo_farmer_1: {
-    username: 'demo_farmer_1',
-    role: ROLES.FARMER,
-    full_name: 'Demo Farmer One',
-    email: 'demo_farmer_1@example.com',
+  demo_manager_1: {
+    username: 'demo_manager_1',
+    role: ROLES.MANAGER,
+    full_name: 'Demo Manager One',
+    email: 'demo_manager_1@example.com',
     phone: '09170000002',
   },
-  demo_farmer_2: {
-    username: 'demo_farmer_2',
-    role: ROLES.FARMER,
-    full_name: 'Demo Farmer Two',
-    email: 'demo_farmer_2@example.com',
+  demo_manager_2: {
+    username: 'demo_manager_2',
+    role: ROLES.MANAGER,
+    full_name: 'Demo Manager Two',
+    email: 'demo_manager_2@example.com',
     phone: '09170000003',
   },
-  demo_buyer_1: {
-    username: 'demo_buyer_1',
-    role: ROLES.BUYER,
-    full_name: 'Demo Buyer One',
-    email: 'demo_buyer_1@example.com',
+  demo_distributor_1: {
+    username: 'demo_distributor_1',
+    role: ROLES.DISTRIBUTOR,
+    full_name: 'Demo Distributor One',
+    email: 'demo_distributor_1@example.com',
     phone: '09170000004',
   },
-  demo_buyer_2: {
-    username: 'demo_buyer_2',
-    role: ROLES.BUYER,
-    full_name: 'Demo Buyer Two',
-    email: 'demo_buyer_2@example.com',
+  demo_distributor_2: {
+    username: 'demo_distributor_2',
+    role: ROLES.DISTRIBUTOR,
+    full_name: 'Demo Distributor Two',
+    email: 'demo_distributor_2@example.com',
     phone: '09170000005',
-  },
-  demo_dispatcher: {
-    username: 'demo_dispatcher',
-    role: ROLES.DISPATCHER,
-    full_name: 'Demo Dispatcher',
-    email: 'demo_dispatcher@example.com',
-    phone: '09170000006',
   },
 }
 

@@ -20,18 +20,19 @@ function AppShell({ user, children }) {
       { id: 'profile', label: 'Open Profile', onSelect: () => navigate('/profile'), hint: 'Route', keywords: ['account'] },
     ]
 
-    if (user?.role === ROLES.BUYER || user?.role === ROLES.ADMIN) {
-      actions.push({ id: 'buyer-orders', label: 'Open Buyer Orders', onSelect: () => navigate('/orders/buyer'), hint: 'Route', keywords: ['purchase', 'orders'] })
+    if (user?.role === ROLES.DISTRIBUTOR || user?.role === ROLES.ADMIN) {
+      actions.push({ id: 'my-requests', label: 'Open My Requests', onSelect: () => navigate('/requests/mine'), hint: 'Route', keywords: ['requests', 'orders'] })
       actions.push({ id: 'demand', label: 'Open Demand Board', onSelect: () => navigate('/demand-board'), hint: 'Route', keywords: ['demand', 'requests'] })
     }
 
-    if (user?.role === ROLES.FARMER || user?.role === ROLES.ADMIN) {
-      actions.push({ id: 'farmer-orders', label: 'Open Farmer Orders', onSelect: () => navigate('/orders/farmer'), hint: 'Route', keywords: ['sales', 'fulfillment'] })
+    if (user?.role === ROLES.DISTRIBUTOR || user?.role === ROLES.ADMIN) {
+      actions.push({ id: 'new-request', label: 'Create Request', onSelect: () => navigate('/requests/new'), hint: 'Route', keywords: ['submit', 'request'] })
       actions.push({ id: 'new-listing', label: 'Create Listing', onSelect: () => navigate('/listings/new'), hint: 'Route', keywords: ['sell', 'post'] })
     }
 
-    if (user?.role === ROLES.DISPATCHER || user?.role === ROLES.ADMIN) {
-      actions.push({ id: 'dispatch', label: 'Open Dispatch Board', onSelect: () => navigate('/logistics/dispatch-board'), hint: 'Route', keywords: ['shipments', 'trips'] })
+    if (user?.role === ROLES.MANAGER || user?.role === ROLES.ADMIN) {
+      actions.push({ id: 'queue', label: 'Open Approval Queue', onSelect: () => navigate('/requests/queue'), hint: 'Route', keywords: ['approve', 'queue'] })
+      actions.push({ id: 'distribution', label: 'Open Distribution Board', onSelect: () => navigate('/distribution/board'), hint: 'Route', keywords: ['shipments', 'trips'] })
     }
 
     return actions

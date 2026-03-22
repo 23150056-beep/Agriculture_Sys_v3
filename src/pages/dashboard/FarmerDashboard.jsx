@@ -22,7 +22,7 @@ function FarmerDashboard() {
   const [error, setError] = useState('')
   const { entries: activityEntries } = useActivityLog()
 
-  const statuses = ['CONFIRMED', 'PACKED', 'IN_TRANSIT', 'DELIVERED']
+  const statuses = ['DRAFT', 'SUBMITTED', 'IN_DELIVERY', 'DELIVERED']
   const chartPoints = useMemo(() => {
     const base = overview?.orders_on_my_listings || 0
     if (!base) return [0, 0, 0, 0]
@@ -44,7 +44,7 @@ function FarmerDashboard() {
       .catch(() => {
         setTotals(null)
         setOverview(null)
-        setError('Failed to load farmer overview')
+        setError('Failed to load distributor overview')
       })
       .finally(() => setLoading(false))
   }, [])
@@ -53,12 +53,12 @@ function FarmerDashboard() {
     <div className="panel">
       <PageHeader
         icon={Tractor}
-        title="Farmer Dashboard"
-        subtitle="Track listings, harvest plans, and active orders."
+        title="Distributor Dashboard"
+        subtitle="Track supply listings, field operations, and active requests."
       />
       <HeroBanner
         imageSrc={heroImage}
-        title="Farm Operations Snapshot"
+        title="Distribution Operations Snapshot"
         subtitle="Watch inventory movement and prioritize listing updates by urgency."
       >
         <AutoRefreshBadge seconds={60} active />
@@ -74,16 +74,16 @@ function FarmerDashboard() {
           </div>
           <DrilldownChartCard
             title="Fulfillment Flow"
-            summary="Click a stage to open farmer orders with that status filter."
+            summary="Click a stage to open your requests with that status filter."
             points={chartPoints}
             range="Current"
             labels={statuses}
-            onPointSelect={(_, label) => navigate(`/orders/farmer?status=${encodeURIComponent(label)}`)}
+            onPointSelect={(_, label) => navigate(`/requests/mine?status=${encodeURIComponent(label)}`)}
           />
-          <ActivityPanel items={activityEntries} title="Farmer Activity" />
+          <ActivityPanel items={activityEntries} title="Distributor Activity" />
         </>
       ) : null}
-      {!loading && !error && !overview && !totals ? <EmptyState title="No farmer metrics" description="Metrics appear once listing and order data is present." /> : null}
+      {!loading && !error && !overview && !totals ? <EmptyState title="No distributor metrics" description="Metrics appear once listing and request data is present." /> : null}
     </div>
   )
 }

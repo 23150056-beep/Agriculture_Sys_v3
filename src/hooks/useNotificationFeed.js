@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { getSummary } from '../api/dashboardApi'
 import { getDemandPosts } from '../api/demandApi'
 import { getShipments } from '../api/logisticsApi'
-import { getFarmerOrders, getMyOrders } from '../api/ordersApi'
+import { getDistributorRequests, getManagerQueue, getMyRequests } from '../api/ordersApi'
 import { ROLES } from '../utils/constants'
 
 const toTimeLabel = (value) => {
@@ -34,16 +34,17 @@ export function useNotificationFeed(user) {
       { key: 'summary', run: () => getSummary() },
     ]
 
-    if (role === ROLES.BUYER || role === ROLES.ADMIN) {
-      jobs.push({ key: 'buyerOrders', run: () => getMyOrders() })
+    if (role === ROLES.DISTRIBUTOR || role === ROLES.ADMIN) {
+      jobs.push({ key: 'distributorRequests', run: () => getMyRequests() })
       jobs.push({ key: 'demandPosts', run: () => getDemandPosts() })
     }
 
-    if (role === ROLES.FARMER || role === ROLES.ADMIN) {
-      jobs.push({ key: 'farmerOrders', run: () => getFarmerOrders() })
+    if (role === ROLES.MANAGER || role === ROLES.ADMIN) {
+      jobs.push({ key: 'managerQueue', run: () => getManagerQueue() })
+      jobs.push({ key: 'distributionRequests', run: () => getDistributorRequests() })
     }
 
-    if (role === ROLES.DISPATCHER || role === ROLES.ADMIN) {
+    if (role === ROLES.MANAGER || role === ROLES.ADMIN) {
       jobs.push({ key: 'shipments', run: () => getShipments() })
     }
 
@@ -65,26 +66,26 @@ export function useNotificationFeed(user) {
         })
       }
 
-      if (key === 'buyerOrders' && Array.isArray(data)) {
+      if (key === 'distributorRequests' && Array.isArray(data)) {
         data.slice(0, 3).forEach((order) => {
           bucket.push({
-            id: `buyer-order-${order.id}`,
-            title: `Order #${order.id} is ${order.status}`,
+            id: `request-${order.id}`,
+            title: `Request #${order.id} is ${order.status}`,
             timeLabel: toTimeLabel(order.updated_at || order.created_at),
             timestamp: new Date(order.updated_at || order.created_at || Date.now()).getTime(),
-            href: `/orders/${order.id}`,
+            href: `/requests/${order.id}`,
           })
         })
       }
 
-      if (key === 'farmerOrders' && Array.isArray(data)) {
+      if ((key === 'managerQueue' || key === 'distributionRequests') && Array.isArray(data)) {
         data.slice(0, 3).forEach((order) => {
           bucket.push({
-            id: `farmer-order-${order.id}`,
-            title: `Farmer order #${order.id} needs ${order.status} action`,
+            id: `queue-request-${order.id}`,
+            title: `Queue request #${order.id} is ${order.status}`,
             timeLabel: toTimeLabel(order.updated_at || order.created_at),
             timestamp: new Date(order.updated_at || order.created_at || Date.now()).getTime(),
-            href: '/orders/farmer',
+            href: '/requests/queue',
           })
         })
       }
@@ -110,7 +111,7 @@ export function useNotificationFeed(user) {
             title: `Shipment #${shipment.id} currently ${shipment.status}`,
             timeLabel: toTimeLabel(shipment.updated_at || shipment.created_at),
             timestamp: new Date(shipment.updated_at || shipment.created_at || Date.now()).getTime(),
-            href: `/logistics/shipment-tracking?status=${encodeURIComponent(shipment.status)}`,
+            href: `/distribution/tracking?status=${encodeURIComponent(shipment.status)}`,
           })
         })
       }

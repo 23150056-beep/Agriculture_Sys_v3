@@ -70,7 +70,7 @@ function TripPlannerPage() {
       setForm({ vehicle: '', driver: '', scheduled_date: '' })
       loadData()
     } catch (error) {
-      setError(getApiErrorMessage(error, 'Failed to create trip. Dispatcher or admin role is required.'))
+      setError(getApiErrorMessage(error, 'Failed to create trip. Manager or admin role is required.'))
     } finally {
       setIsCreatingTrip(false)
     }

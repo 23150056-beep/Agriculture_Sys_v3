@@ -78,15 +78,15 @@ function AdminDashboard() {
   const priorityAction = useMemo(() => {
     if (!totals) return '/marketplace'
     const ranking = [
-      { key: 'orders', route: '/orders/buyer' },
-      { key: 'shipments', route: '/logistics/dispatch-board' },
+      { key: 'orders', route: '/requests/queue' },
+      { key: 'shipments', route: '/distribution/board' },
       { key: 'demand_posts', route: '/demand-board' },
     ]
     ranking.sort((a, b) => (totals[b.key] || 0) - (totals[a.key] || 0))
     return ranking[0].route
   }, [totals])
 
-  const drilldownStatuses = ['PENDING', 'CONFIRMED', 'IN_TRANSIT', 'DELIVERED']
+  const drilldownStatuses = ['SUBMITTED', 'UNDER_REVIEW', 'IN_DELIVERY', 'DELIVERED']
   const opsPulse = useMemo(() => {
     if (!totals) return []
     const pendingOrders = Math.max((totals.orders || 0) - Math.round((totals.shipments || 0) * 0.6), 0)
@@ -171,7 +171,7 @@ function AdminDashboard() {
                 points={trendData.points}
                 range={range}
                 labels={drilldownStatuses}
-                onPointSelect={(_, label) => navigate(`/orders/buyer?status=${encodeURIComponent(label)}`)}
+                onPointSelect={(_, label) => navigate(`/requests/queue?status=${encodeURIComponent(label)}`)}
               />
             </div>
             <LiveActivityFeed items={activity} />

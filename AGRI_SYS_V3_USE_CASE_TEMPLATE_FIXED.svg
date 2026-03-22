@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1900" viewBox="0 0 1200 1900">
+  <defs>
+    <style>
+      .box { fill: #f7f7f7; stroke: #222; stroke-width: 2; }
+      .uc-main { fill: #f7f7f7; stroke: #333; stroke-width: 2; }
+      .uc-sub { fill: #f7f7f7; stroke: #444; stroke-width: 1.6; }
+      .txt-title { font: 700 34px Arial, sans-serif; fill: #111; }
+      .txt-main { font: 700 28px Arial, sans-serif; fill: #111; }
+      .txt-sub { font: 500 22px Arial, sans-serif; fill: #111; }
+      .txt-actor { font: 500 28px Arial, sans-serif; fill: #111; }
+      .line { stroke: #333; stroke-width: 1.8; fill: none; }
+      .inc { stroke: #444; stroke-width: 1.6; stroke-dasharray: 8 8; fill: none; }
+      .inc-text { font: 600 18px Arial, sans-serif; fill: #111; }
+      .actor-line { stroke: #333; stroke-width: 2; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <polygon points="0,0 10,4 0,8" fill="#444" />
+    </marker>
+  </defs>
+
+  <!-- Actors -->
+  <g transform="translate(60,760)">
+    <circle cx="0" cy="0" r="14" class="actor-line" fill="none"/>
+    <line x1="0" y1="14" x2="0" y2="70" class="actor-line"/>
+    <line x1="-28" y1="40" x2="28" y2="40" class="actor-line"/>
+    <line x1="0" y1="70" x2="-24" y2="108" class="actor-line"/>
+    <line x1="0" y1="70" x2="24" y2="108" class="actor-line"/>
+    <text x="-40" y="150" class="txt-actor">Admin</text>
+  </g>
+
+  <g transform="translate(1130,640)">
+    <circle cx="0" cy="0" r="14" class="actor-line" fill="none"/>
+    <line x1="0" y1="14" x2="0" y2="70" class="actor-line"/>
+    <line x1="-28" y1="40" x2="28" y2="40" class="actor-line"/>
+    <line x1="0" y1="70" x2="-24" y2="108" class="actor-line"/>
+    <line x1="0" y1="70" x2="24" y2="108" class="actor-line"/>
+    <text x="-55" y="150" class="txt-actor">Manager</text>
+  </g>
+
+  <g transform="translate(1130,960)">
+    <circle cx="0" cy="0" r="14" class="actor-line" fill="none"/>
+    <line x1="0" y1="14" x2="0" y2="70" class="actor-line"/>
+    <line x1="-28" y1="40" x2="28" y2="40" class="actor-line"/>
+    <line x1="0" y1="70" x2="-24" y2="108" class="actor-line"/>
+    <line x1="0" y1="70" x2="24" y2="108" class="actor-line"/>
+    <text x="-70" y="150" class="txt-actor">Distributor</text>
+  </g>
+
+  <!-- System Boundary -->
+  <rect x="150" y="40" width="900" height="1800" rx="6" class="box"/>
+  <text x="600" y="80" text-anchor="middle" class="txt-title">Centralized Agricultural Product Distribution Management System</text>
+  <text x="600" y="120" text-anchor="middle" class="txt-title">for the Bauang Agricultural Trade Center</text>
+  <text x="600" y="160" text-anchor="middle" class="txt-title">(AGRI_SYS_V3)</text>
+
+  <!-- Main use cases -->
+  <ellipse cx="600" cy="230" rx="120" ry="30" class="uc-main"/><text x="600" y="240" text-anchor="middle" class="txt-main">Login</text>
+
+  <ellipse cx="600" cy="360" rx="180" ry="36" class="uc-main"/><text x="600" y="371" text-anchor="middle" class="txt-main">User Management</text>
+
+  <ellipse cx="600" cy="540" rx="200" ry="36" class="uc-main"/><text x="600" y="551" text-anchor="middle" class="txt-main">Listing Management</text>
+
+  <ellipse cx="600" cy="760" rx="290" ry="40" class="uc-main"/><text x="600" y="772" text-anchor="middle" class="txt-main">Marketplace and Demand Management</text>
+
+  <ellipse cx="600" cy="1020" rx="190" ry="36" class="uc-main"/><text x="600" y="1031" text-anchor="middle" class="txt-main">Order Management</text>
+
+  <ellipse cx="600" cy="1260" rx="200" ry="36" class="uc-main"/><text x="600" y="1271" text-anchor="middle" class="txt-main">Logistics Management</text>
+
+  <ellipse cx="600" cy="1530" rx="170" ry="36" class="uc-main"/><text x="600" y="1541" text-anchor="middle" class="txt-main">Generate Report</text>
+
+  <!-- User Management includes -->
+  <ellipse cx="470" cy="450" rx="120" ry="26" class="uc-sub"/><text x="470" y="458" text-anchor="middle" class="txt-sub">Register Account</text>
+  <ellipse cx="730" cy="450" rx="95" ry="26" class="uc-sub"/><text x="730" y="458" text-anchor="middle" class="txt-sub">View Profile</text>
+  <line x1="560" y1="390" x2="500" y2="430" class="inc" marker-end="url(#arrow)"/><text x="520" y="410" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+  <line x1="640" y1="390" x2="700" y2="430" class="inc" marker-end="url(#arrow)"/><text x="650" y="410" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+
+  <!-- Listing Management includes -->
+  <ellipse cx="360" cy="650" rx="105" ry="26" class="uc-sub"/><text x="360" y="658" text-anchor="middle" class="txt-sub">Create Listing</text>
+  <ellipse cx="520" cy="650" rx="95" ry="26" class="uc-sub"/><text x="520" y="658" text-anchor="middle" class="txt-sub">Edit Listing</text>
+  <ellipse cx="680" cy="650" rx="95" ry="26" class="uc-sub"/><text x="680" y="658" text-anchor="middle" class="txt-sub">View Listings</text>
+  <ellipse cx="850" cy="650" rx="95" ry="26" class="uc-sub"/><text x="850" y="658" text-anchor="middle" class="txt-sub">Clone Listing</text>
+  <line x1="540" y1="575" x2="390" y2="630" class="inc" marker-end="url(#arrow)"/><text x="455" y="605" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+  <line x1="580" y1="578" x2="530" y2="628" class="inc" marker-end="url(#arrow)"/><text x="540" y="612" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+  <line x1="620" y1="578" x2="670" y2="628" class="inc" marker-end="url(#arrow)"/><text x="625" y="612" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+  <line x1="660" y1="575" x2="820" y2="630" class="inc" marker-end="url(#arrow)"/><text x="730" y="605" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+
+  <!-- Marketplace and Demand includes -->
+  <ellipse cx="300" cy="890" rx="130" ry="26" class="uc-sub"/><text x="300" y="898" text-anchor="middle" class="txt-sub">Browse Marketplace</text>
+  <ellipse cx="510" cy="890" rx="135" ry="26" class="uc-sub"/><text x="510" y="898" text-anchor="middle" class="txt-sub">Create Demand Post</text>
+  <ellipse cx="710" cy="890" rx="135" ry="26" class="uc-sub"/><text x="710" y="898" text-anchor="middle" class="txt-sub">Submit Demand Offer</text>
+  <ellipse cx="900" cy="890" rx="130" ry="26" class="uc-sub"/><text x="900" y="898" text-anchor="middle" class="txt-sub">View Demand Offers</text>
+  <line x1="500" y1="800" x2="335" y2="870" class="inc" marker-end="url(#arrow)"/><text x="410" y="838" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+  <line x1="560" y1="805" x2="520" y2="870" class="inc" marker-end="url(#arrow)"/><text x="530" y="842" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+  <line x1="640" y1="805" x2="695" y2="870" class="inc" marker-end="url(#arrow)"/><text x="650" y="842" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+  <line x1="700" y1="800" x2="870" y2="870" class="inc" marker-end="url(#arrow)"/><text x="770" y="838" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+
+  <!-- Order Management includes -->
+  <ellipse cx="330" cy="1130" rx="95" ry="26" class="uc-sub"/><text x="330" y="1138" text-anchor="middle" class="txt-sub">Create Order</text>
+  <ellipse cx="520" cy="1130" rx="130" ry="26" class="uc-sub"/><text x="520" y="1138" text-anchor="middle" class="txt-sub">Update Order Status</text>
+  <ellipse cx="710" cy="1130" rx="120" ry="26" class="uc-sub"/><text x="710" y="1138" text-anchor="middle" class="txt-sub">View Buyer Orders</text>
+  <ellipse cx="890" cy="1130" rx="125" ry="26" class="uc-sub"/><text x="890" y="1138" text-anchor="middle" class="txt-sub">View Farmer Orders</text>
+  <line x1="520" y1="1050" x2="360" y2="1110" class="inc" marker-end="url(#arrow)"/><text x="430" y="1085" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+  <line x1="575" y1="1055" x2="530" y2="1110" class="inc" marker-end="url(#arrow)"/><text x="545" y="1086" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+  <line x1="640" y1="1055" x2="700" y2="1110" class="inc" marker-end="url(#arrow)"/><text x="650" y="1086" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+  <line x1="700" y1="1050" x2="860" y2="1110" class="inc" marker-end="url(#arrow)"/><text x="770" y="1085" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+
+  <!-- Logistics includes -->
+  <ellipse cx="250" cy="1370" rx="90" ry="26" class="uc-sub"/><text x="250" y="1378" text-anchor="middle" class="txt-sub">Create Trip</text>
+  <ellipse cx="430" cy="1370" rx="110" ry="26" class="uc-sub"/><text x="430" y="1378" text-anchor="middle" class="txt-sub">Assign Shipment</text>
+  <ellipse cx="620" cy="1370" rx="105" ry="26" class="uc-sub"/><text x="620" y="1378" text-anchor="middle" class="txt-sub">Track Shipment</text>
+  <ellipse cx="810" cy="1370" rx="150" ry="26" class="uc-sub"/><text x="810" y="1378" text-anchor="middle" class="txt-sub">Update Shipment Status</text>
+  <ellipse cx="980" cy="1370" rx="120" ry="26" class="uc-sub"/><text x="980" y="1378" text-anchor="middle" class="txt-sub">Proof of Delivery</text>
+  <line x1="500" y1="1290" x2="280" y2="1350" class="inc" marker-end="url(#arrow)"/><text x="390" y="1325" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+  <line x1="545" y1="1295" x2="450" y2="1350" class="inc" marker-end="url(#arrow)"/><text x="500" y="1328" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+  <line x1="600" y1="1298" x2="610" y2="1348" class="inc" marker-end="url(#arrow)"/><text x="615" y="1330" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+  <line x1="655" y1="1295" x2="780" y2="1350" class="inc" marker-end="url(#arrow)"/><text x="710" y="1328" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+  <line x1="700" y1="1290" x2="950" y2="1350" class="inc" marker-end="url(#arrow)"/><text x="820" y="1325" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+
+  <!-- Report includes -->
+  <ellipse cx="470" cy="1650" rx="135" ry="26" class="uc-sub"/><text x="470" y="1658" text-anchor="middle" class="txt-sub">View Role Dashboard</text>
+  <ellipse cx="660" cy="1650" rx="135" ry="26" class="uc-sub"/><text x="660" y="1658" text-anchor="middle" class="txt-sub">View Summary Metrics</text>
+  <ellipse cx="840" cy="1650" rx="120" ry="26" class="uc-sub"/><text x="840" y="1658" text-anchor="middle" class="txt-sub">View Activity Log</text>
+  <ellipse cx="1000" cy="1650" rx="110" ry="26" class="uc-sub"/><text x="1000" y="1658" text-anchor="middle" class="txt-sub">Export CSV Report</text>
+  <line x1="540" y1="1560" x2="500" y2="1630" class="inc" marker-end="url(#arrow)"/><text x="500" y="1602" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+  <line x1="590" y1="1563" x2="640" y2="1630" class="inc" marker-end="url(#arrow)"/><text x="610" y="1602" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+  <line x1="650" y1="1563" x2="825" y2="1630" class="inc" marker-end="url(#arrow)"/><text x="720" y="1602" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+  <line x1="700" y1="1560" x2="980" y2="1630" class="inc" marker-end="url(#arrow)"/><text x="840" y="1602" class="inc-text">&lt;&lt;include&gt;&gt;</text>
+
+  <!-- Actor to main use-cases -->
+  <line x1="88" y1="800" x2="480" y2="230" class="line"/>
+  <line x1="88" y1="820" x2="430" y2="360" class="line"/>
+  <line x1="88" y1="850" x2="400" y2="540" class="line"/>
+  <line x1="88" y1="880" x2="320" y2="760" class="line"/>
+  <line x1="88" y1="910" x2="410" y2="1020" class="line"/>
+  <line x1="88" y1="940" x2="400" y2="1260" class="line"/>
+  <line x1="88" y1="970" x2="430" y2="1530" class="line"/>
+
+  <line x1="1080" y1="680" x2="720" y2="360" class="line"/>
+  <line x1="1080" y1="700" x2="800" y2="760" class="line"/>
+  <line x1="1080" y1="720" x2="790" y2="1020" class="line"/>
+  <line x1="1080" y1="740" x2="770" y2="1530" class="line"/>
+
+  <line x1="1080" y1="1000" x2="790" y2="1020" class="line"/>
+  <line x1="1080" y1="1020" x2="800" y2="1260" class="line"/>
+  <line x1="1080" y1="1040" x2="770" y2="1530" class="line"/>
+</svg>
