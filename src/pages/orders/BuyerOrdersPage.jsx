@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ShoppingCart } from 'lucide-react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { getLocations } from '../../api/catalogApi'
 import { getListings } from '../../api/listingsApi'
 import DynamicAutoRefreshBadge from '../../components/dynamic/AutoRefreshBadge'
@@ -28,6 +28,7 @@ import useAutoRefresh from '../../hooks/useAutoRefresh'
 import useSavedViews from '../../hooks/useSavedViews'
 
 function BuyerOrdersPage() {
+  const location = useLocation()
   const [searchParams] = useSearchParams()
   const [orders, setOrders] = useState([])
   const [listings, setListings] = useState([])
@@ -77,6 +78,8 @@ function BuyerOrdersPage() {
   })
 
   const statuses = ['ALL', ...new Set(orders.map((order) => order.status))]
+  const isNewRequestRoute = location.pathname === '/requests/new'
+  const isMyRequestsRoute = location.pathname === '/requests/mine'
 
   const loadData = useCallback(async () => {
     try {
@@ -151,14 +154,20 @@ function BuyerOrdersPage() {
     <section className="panel">
       <PageHeader
         icon={ShoppingCart}
-        title="Distributor Requests"
-        subtitle="Create and monitor distribution requests from marketplace supply."
+        title={isNewRequestRoute ? 'New Request' : isMyRequestsRoute ? 'My Requests' : 'Distributor Requests'}
+        subtitle={
+          isNewRequestRoute
+            ? 'Create a new distribution request from marketplace supply.'
+            : isMyRequestsRoute
+              ? 'Track and manage your submitted requests.'
+              : 'Create and monitor distribution requests from marketplace supply.'
+        }
       />
       <section className="card module-hero">
         <div>
           <p className="module-kicker">Request Pipeline</p>
-          <h3>Submit and track fulfillment across every stage</h3>
-          <p>Launch new requests and monitor readiness signals from submission through delivery.</p>
+          <h3>{isNewRequestRoute ? 'Submit a new fulfillment request' : 'Track fulfillment across every stage'}</h3>
+          <p>{isNewRequestRoute ? 'Choose listing, quantity, and destination to create a request quickly.' : 'Monitor readiness signals from submission through delivery.'}</p>
         </div>
         <span className="highlight-metric">{filteredOrders.length} visible requests</span>
       </section>
@@ -170,6 +179,7 @@ function BuyerOrdersPage() {
         onRefresh={refreshNow}
       />
 
+      {!isMyRequestsRoute ? (
       <section className="card module-block">
       <p className="section-label">Create New Request</p>
 
@@ -195,10 +205,12 @@ function BuyerOrdersPage() {
         <button type="submit">Create Request</button>
       </form>
       </section>
+      ) : null}
 
       <Toast message={message} type="success" />
       {error ? <ErrorState message={error} /> : null}
 
+      {!isNewRequestRoute ? (
       <section className="card module-block">
       <p className="section-label">Request History</p>
       <FilterBar>
@@ -246,12 +258,16 @@ function BuyerOrdersPage() {
         />
       </FilterBar>
       </section>
+      ) : null}
+
       {loading ? <SkeletonLoader lines={4} variant="table" /> : null}
+
+      {!isNewRequestRoute ? (
       <div className="desktop-list card module-block module-list">
         <DataTable
           rowKey="id"
           rows={filteredOrders}
-          emptyFallback={<EmptyState title="No orders found" description="Create an order above to get started." />}
+          emptyFallback={<EmptyState title="No requests found" description="Your submitted requests will appear here." />}
           columns={[
             { key: 'id', label: 'Request', render: (order) => <Link to={`/requests/${order.id}`}>#{order.id}</Link> },
             {
@@ -283,6 +299,9 @@ function BuyerOrdersPage() {
           ]}
         />
       </div>
+      ) : null}
+
+      {!isNewRequestRoute ? (
       <div className="mobile-card-list">
         {filteredOrders.map((order) => (
           <ImageCard
@@ -300,6 +319,11 @@ function BuyerOrdersPage() {
           </ImageCard>
         ))}
       </div>
+      ) : null}
+
+      {isNewRequestRoute && !loading ? (
+        <EmptyState title="Request form ready" description="Submit a request above. You can track it later in My Requests." />
+      ) : null}
     </section>
   )
 }
